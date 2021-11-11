@@ -1,17 +1,19 @@
-require('dotenv').config();
+import dotenv from "dotenv";
+import express from "express";
+import mongoose from "mongoose";
+import routes from "./routes/index.js"
+
+dotenv.config();
 
 // connect to database
-const mongoose = require('mongoose');
 mongoose.connect(process.env.DB_URI)
-  .then(() => console.log(`Database connected successfully`))
+  .then(() => console.log("Connected to mongoDB"))
   .catch(err => console.log(err));
-
-const express = require('express')
 
 const app = express();
 const port = 8000;
 
-app.use(function (req, res, next) {
+app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
     "Access-Control-Allow-Headers",
@@ -19,13 +21,11 @@ app.use(function (req, res, next) {
   );
   next();
 });
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
 
-app.get("/test", (req, res) => {
-  res.send("TEST");
-});
+app.use(express.json());
+
+app.use("/api", routes);
+
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}!`);
 });
