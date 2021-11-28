@@ -1,53 +1,20 @@
+import mongoose from "mongoose";
+import Classes from "./../models/Classes.js"
+import DetailedClass from "./../models/DetailedClass.js"
+
 const controller = {};
 
 controller.getAll = async (req, res) => {
-    res.json({
-        "courses": [
-            {
-                "subject": "Computer Science",
-                "abbreviation": "COM SCI",
-                "number": "35L",
-                "requisites": ["test"],
-                "quarters": ["test"]
-            },
-            {
-                "subject": "Computer Science",
-                "abbreviation": "COM SCI",
-                "number": "180",
-                "requisites": ["test"],
-                "quarters": ["test"]
-            },
-            {
-                "subject": "Mathematics",
-                "abbreviation": "MATH",
-                "number": "31A",
-                "requisites": ["test"],
-                "quarters": ["test"]
-            },
-            {
-                "subject": "Physics",
-                "abbreviation": "PHYSICS",
-                "number": "1C",
-                "requisites": ["test"],
-                "quarters": ["test"]
-            },
-            {
-                "subject": "Psychology",
-                "abbreviation": "PSYCH",
-                "number": "85",
-                "requisites": ["test"],
-                "quarters": ["test"]
-            }
-        ]
-    });
+    res.send(await Classes.find());
 }
 
-controller.getSingle = (req, res) => {
-    res.send("NOT IMPLEMENTED: get single course");
+controller.getSingle = async (req, res) => {
+    res.send(await DetailedClass.byName(req.params.course));
 }
 
 controller.getEligible = async (req, res) => {
     res.send("NOT IMPLEMENTED: get eligible courses");
 }
+
 
 export default controller;
