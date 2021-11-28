@@ -16,5 +16,4 @@ controller.getEligible = async (req, res) => {
     res.send("NOT IMPLEMENTED: get eligible courses");
 }
 
-
 export default controller;
