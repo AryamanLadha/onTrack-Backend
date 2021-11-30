@@ -27,7 +27,8 @@ controller.getEligible = async (req, res) => {
 
     // TODO: get valid courses for major (using fake data for now)
     const avaliableClasses = {
-        "Computer Science": ["COM SCI 180", "COM SCI 181", "COM SCI 31", "COM SCI 32", "COM SCI 181"]
+        "Computer Science": ["COM SCI 180", "COM SCI 181", "COM SCI 31", "COM SCI 32", "COM SCI 33", "COM SCI 181"],
+        "Physics": ["PHYSICS 4AL", "PHYSICS 1A", "PHYSICS 1B", "PHYSICS 1C"]
     }
 
     const completedClasses = data.completedClasses.length > 0 ? data.completedClasses.reduce((a, v) => ({ ...a, [v]: 0 }), {}) : {};
@@ -41,19 +42,20 @@ controller.getEligible = async (req, res) => {
             let currCourse = await DetailedClass.byName(avaliableClasses[subjects][course]);
             // Class not found in database (invalid short name or missing from database)
             if (currCourse.length === 0) {
-                // TODO: Handle this error. This is quite bad
-                console.log("NOT FOUND", avaliableClasses[subjects][course]);
+                // TODO: Handle this error. Class not avaliable for the quarter or it's just missing from DB.
+                console.log("NOT FOUND/OFFERED THIS QUARTER: " + avaliableClasses[subjects][course]);
             } else {
                 let addCourse = true;
                 // Check if class is already completed or in progress
-                if (completedClasses.hasOwnProperty(currCourse[0]["Name"] || currentClasses.hasOwnProperty(currCourse[0]["Name"]))) {
+                if (completedClasses.hasOwnProperty(currCourse[0]["Name"]) || currentClasses.hasOwnProperty(currCourse[0]["Name"])) {
+                    console.log("Already completed or in progress: " + currCourse[0]["Name"]);
                     addCourse = false;
                 }
                 for (const course in currCourse[0]["Enforced Prerequisites"]) {
                     if (!addCourse) {
                         break;
                     }
-                    if (!completedClasses.hasOwnProperty([currCourse[0]["Enforced Prerequisites"][course]])) {
+                    if (!completedClasses.hasOwnProperty(currCourse[0]["Enforced Prerequisites"][course])) {
                         addCourse = false;
                         break;
                     }
@@ -62,7 +64,7 @@ controller.getEligible = async (req, res) => {
                     if (!addCourse) {
                         break;
                     }
-                    if (!currentClasses.hasOwnProperty([currCourse[0]["Enforced Corequisites"][course]])) {
+                    if (!currentClasses.hasOwnProperty(currCourse[0]["Enforced Corequisites"][course]) && !completedClasses.hasOwnProperty(currCourse[0]["Enforced Corequisites"][course])) {
                         addCourse = false;
                         break;
                     }
