@@ -8,7 +8,8 @@ controller.getAll = async (req, res) => {
 }
 
 controller.getSingle = async (req, res) => {
-    res.send(await DetailedClass.byName(req.params.course).toObject());
+    const data = await DetailedClass.byName(req.params.course);
+    res.send(data.length === 0 ? {} : data[0].toObject());
 }
 
 controller.getEligible = async (req, res) => {
@@ -51,26 +52,27 @@ controller.getEligible = async (req, res) => {
                 if (currCourse.length === 0) {
                     // console.log("NOT FOUND/OFFERED THIS QUARTER: " + avaliableClasses[subjects][course]);
                 } else {
+                    currCourse = currCourse[0];
                     let addCourse = true;
                     // Check if class is already completed or in progress
-                    if (completedClasses.hasOwnProperty(currCourse[0]["Name"]) || currentClasses.hasOwnProperty(currCourse[0]["Name"])) {
-                        // console.log("Already completed or in progress: " + currCourse[0]["Name"]);
+                    if (completedClasses.hasOwnProperty(currCourse["Name"]) || currentClasses.hasOwnProperty(currCourse["Name"])) {
+                        // console.log("Already completed or in progress: " + currCourse["Name"]);
                         addCourse = false;
                     }
-                    for (const course in currCourse[0]["Enforced Prerequisites"]) {
+                    for (const course in currCourse["Enforced Prerequisites"]) {
                         if (!addCourse) {
                             break;
                         }
-                        if (!completedClasses.hasOwnProperty(currCourse[0]["Enforced Prerequisites"][course])) {
+                        if (!completedClasses.hasOwnProperty(currCourse["Enforced Prerequisites"][course])) {
                             addCourse = false;
                             break;
                         }
                     }
-                    for (const course in currCourse[0]["Enforced Corequisites"]) {
+                    for (const course in currCourse["Enforced Corequisites"]) {
                         if (!addCourse) {
                             break;
                         }
-                        if (!currentClasses.hasOwnProperty(currCourse[0]["Enforced Corequisites"][course]) && !completedClasses.hasOwnProperty(currCourse[0]["Enforced Corequisites"][course])) {
+                        if (!currentClasses.hasOwnProperty(currCourse["Enforced Corequisites"][course]) && !completedClasses.hasOwnProperty(currCourse["Enforced Corequisites"][course])) {
                             addCourse = false;
                             break;
                         }
@@ -78,9 +80,9 @@ controller.getEligible = async (req, res) => {
 
                     if (addCourse) {
                         if (eligibleClasses[0].subjects.hasOwnProperty(subjects)) {
-                            eligibleClasses[0].subjects[subjects].push(currCourse[0]["Name"]);
+                            eligibleClasses[0].subjects[subjects].push(currCourse["Name"]);
                         } else {
-                            eligibleClasses[0].subjects[subjects] = [currCourse[0]["Name"]];
+                            eligibleClasses[0].subjects[subjects] = [currCourse["Name"]];
                         }
                     }
                 }
