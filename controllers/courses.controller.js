@@ -4,7 +4,7 @@ import DetailedClass from "./../models/DetailedClass.js"
 const controller = {};
 
 controller.getAll = async (req, res) => {
-    res.send(await Classes.find());
+    res.send((await Classes.find())[0].toObject().courses);
 }
 
 controller.getSingle = async (req, res) => {
