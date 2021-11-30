@@ -32,9 +32,7 @@ controller.getEligible = async (req, res) => {
     }
 
     const completedClasses = data.completedClasses.length > 0 ? data.completedClasses.reduce((a, v) => ({ ...a, [v]: 0 }), {}) : {};
-    console.log(completedClasses);
     const currentClasses = data.currentClasses.length > 0 ? data.currentClasses.reduce((a, v) => ({ ...a, [v]: 0 }), {}) : {};
-    console.log(currentClasses);
 
     const eligibleClasses = [{ "quarter": currQuarter, "subjects": {} }];
     for (const subjects in avaliableClasses) {
@@ -42,7 +40,6 @@ controller.getEligible = async (req, res) => {
             let currCourse = await DetailedClass.byName(avaliableClasses[subjects][course]);
             // Class not found in database (invalid short name or missing from database)
             if (currCourse.length === 0) {
-                // TODO: Handle this error. Class not avaliable for the quarter or it's just missing from DB.
                 console.log("NOT FOUND/OFFERED THIS QUARTER: " + avaliableClasses[subjects][course]);
             } else {
                 let addCourse = true;
