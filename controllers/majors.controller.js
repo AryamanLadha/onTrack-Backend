@@ -2,7 +2,7 @@ const controller = {};
 
 controller.getAll = async (req, res) => {
     res.json({
-        "majors":[
+        "majors": [
             {
                 "name": "Mathematics",
                 "abbreviation": "MATH",

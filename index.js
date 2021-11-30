@@ -2,6 +2,7 @@ import dotenv from "dotenv";
 import express from "express";
 import mongoose from "mongoose";
 import routes from "./routes/index.js"
+import helmet from "helmet";
 
 dotenv.config();
 
@@ -9,9 +10,8 @@ dotenv.config();
 mongoose.connect(process.env.DB_URI)
   .then(() => console.log("Connected to mongoDB"))
   .catch(err => console.log(err));
-
 const app = express();
-const port = 8000;
+const port = process.env.PORT || 8000;
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
@@ -21,6 +21,8 @@ app.use((req, res, next) => {
   );
   next();
 });
+
+app.use(helmet());
 
 app.use(express.json());
 

@@ -6,5 +6,4 @@ router.get("/", controller.getAll);
 router.get("/eligible", controller.getEligible);
 router.get("/:course", controller.getSingle);
 
-
 export default router;
