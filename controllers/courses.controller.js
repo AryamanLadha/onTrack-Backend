@@ -8,7 +8,7 @@ controller.getAll = async (req, res) => {
 }
 
 controller.getSingle = async (req, res) => {
-    res.send(await DetailedClass.byName(req.params.course));
+    res.send(await DetailedClass.byName(req.params.course).toObject());
 }
 
 controller.getEligible = async (req, res) => {
