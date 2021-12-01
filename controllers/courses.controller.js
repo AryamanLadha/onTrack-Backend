@@ -40,49 +40,68 @@ controller.getEligible = async (req, res) => {
     const eligibleClasses = [{ "quarter": currQuarter, "subjects": {} }];
 
     for (const major in data.major) {
-        // TODO: get valid courses for data.majors[major] (using fake data for now)
-        const avaliableClasses = {
-            "Computer Science": ["COM SCI 180", "COM SCI 181", "COM SCI 31", "COM SCI 32", "COM SCI 33", "COM SCI 181"],
-            "Physics": ["PHYSICS 4AL", "PHYSICS 1A", "PHYSICS 1B", "PHYSICS 1C"]
-        }
-        for (const subjects in avaliableClasses) {
-            for (const course in avaliableClasses[subjects]) {
-                let currCourse = await DetailedClass.byName(avaliableClasses[subjects][course]);
-                // Class not found in database (invalid short name or missing from database)
-                if (currCourse.length === 0) {
-                    // console.log("NOT FOUND/OFFERED THIS QUARTER: " + avaliableClasses[subjects][course]);
-                } else {
-                    currCourse = currCourse[0];
-                    let addCourse = true;
-                    // Check if class is already completed or in progress
-                    if (completedClasses.hasOwnProperty(currCourse["Name"]) || currentClasses.hasOwnProperty(currCourse["Name"])) {
-                        // console.log("Already completed or in progress: " + currCourse["Name"]);
-                        addCourse = false;
-                    }
-                    for (const course in currCourse["Enforced Prerequisites"]) {
-                        if (!addCourse) {
-                            break;
-                        }
-                        if (!completedClasses.hasOwnProperty(currCourse["Enforced Prerequisites"][course])) {
-                            addCourse = false;
-                            break;
-                        }
-                    }
-                    for (const course in currCourse["Enforced Corequisites"]) {
-                        if (!addCourse) {
-                            break;
-                        }
-                        if (!currentClasses.hasOwnProperty(currCourse["Enforced Corequisites"][course]) && !completedClasses.hasOwnProperty(currCourse["Enforced Corequisites"][course])) {
-                            addCourse = false;
-                            break;
-                        }
-                    }
+        /*  http://localhost:8000/api/courses/eligible/?studentData=
+         * {"currentClasses":[],"completedClasses":["COM SCI 180", "MATH 32A", "MATH 32B", "MATH 61", "MATH 31B", "MATH 31A", "PHYSICS 1A"],"major":["COM SCI"]}
+         * TODO: get valid courses for data.majors[major] (using fake data for now)
+         */
 
-                    if (addCourse) {
-                        if (eligibleClasses[0].subjects.hasOwnProperty(subjects)) {
-                            eligibleClasses[0].subjects[subjects].push(currCourse["Name"]);
-                        } else {
-                            eligibleClasses[0].subjects[subjects] = [currCourse["Name"]];
+        const avaliableClasses = {
+            "COM SCI": ["COM SCI 180-185", "COM SCI 31-33"],
+            "PHYSICS": ["PHYSICS 4AL", "PHYSICS 1A", "PHYSICS 1B", "PHYSICS 1C"]
+        }
+
+        for (const subject in avaliableClasses) {
+            for (const currentEntry in avaliableClasses[subject]) {
+                let coursesToCheck = [];
+
+                if (avaliableClasses[subject][currentEntry].includes("-")) {
+                    let classNum = avaliableClasses[subject][currentEntry].split(" ");
+                    classNum = classNum[classNum.length - 1].split("-");
+                    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
+                    const range = (start, stop, step) =>
+                        Array.from({ length: (stop - start) / step + 1 }, (_, i) => subject + " " + (start + (i * step)));
+                    coursesToCheck = range(parseInt(classNum[0]), parseInt(classNum[1]), 1);
+                } else {
+                    coursesToCheck = [avaliableClasses[subject][currentEntry]];
+                }
+
+                for (const course in coursesToCheck) {
+                    let currCourse = await DetailedClass.byName(coursesToCheck[course]);
+                    // Class not offered/found this quarter (invalid short name or missing from database)
+                    if (currCourse.length === 0) {
+                        // console.log(coursesToCheck[course] + " not offered this quarter");
+                    } else {
+                        currCourse = currCourse[0];
+                        let addCourse = true;
+                        // Check if class is already completed or in progress
+                        if (completedClasses.hasOwnProperty(currCourse["Name"]) || currentClasses.hasOwnProperty(currCourse["Name"])) {
+                            addCourse = false;
+                        }
+                        for (const course in currCourse["Enforced Prerequisites"]) {
+                            if (!addCourse) {
+                                break;
+                            }
+                            if (!completedClasses.hasOwnProperty(currCourse["Enforced Prerequisites"][course])) {
+                                addCourse = false;
+                                break;
+                            }
+                        }
+                        for (const course in currCourse["Enforced Corequisites"]) {
+                            if (!addCourse) {
+                                break;
+                            }
+                            if (!currentClasses.hasOwnProperty(currCourse["Enforced Corequisites"][course]) && !completedClasses.hasOwnProperty(currCourse["Enforced Corequisites"][course])) {
+                                addCourse = false;
+                                break;
+                            }
+                        }
+
+                        if (addCourse) {
+                            if (eligibleClasses[0].subjects.hasOwnProperty(subject)) {
+                                eligibleClasses[0].subjects[subject].push(currCourse["Name"]);
+                            } else {
+                                eligibleClasses[0].subjects[subject] = [currCourse["Name"]];
+                            }
                         }
                     }
                 }
