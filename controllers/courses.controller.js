@@ -14,12 +14,14 @@ controller.getSingle = async (req, res) => {
 }
 
 controller.getEligible = async (req, res) => {
-    const d = new Date();
-    const quarter = (d.getMonth() + 1) >= 2 && (d.getMonth() + 1) <= 4 ? "Spring" :
-        (d.getMonth() + 1) >= 5 && (d.getMonth() + 1) <= 6 ? "Summer" :
-            (d.getMonth() + 1) >= 7 && (d.getMonth() + 1) <= 9 ? "Fall" : "Winter";
-    const year = quarter === "Winter" ? d.getFullYear() + 1 : d.getFullYear();
-    const currQuarter = quarter + " " + year;
+    const currQuarter = (async () => {
+        const d = new Date();
+        const quarter = (d.getMonth() + 1) >= 2 && (d.getMonth() + 1) <= 4 ? "Spring" :
+            (d.getMonth() + 1) >= 5 && (d.getMonth() + 1) <= 6 ? "Summer" :
+                (d.getMonth() + 1) >= 7 && (d.getMonth() + 1) <= 9 ? "Fall" : "Winter";
+        const year = quarter === "Winter" ? d.getFullYear() + 1 : d.getFullYear();
+        return quarter + " " + year;
+    })();
 
     let data = {};
     try {
@@ -38,46 +40,47 @@ controller.getEligible = async (req, res) => {
 
     const completedClasses = data.completedClasses.length > 0 ? data.completedClasses.reduce((a, v) => ({ ...a, [v]: 0 }), {}) : {};
     const currentClasses = data.currentClasses.length > 0 ? data.currentClasses.reduce((a, v) => ({ ...a, [v]: 0 }), {}) : {};
-    const eligibleClasses = [{ "quarter": currQuarter, "subjects": {} }];
+    const eligibleClasses = [{ "quarter": await currQuarter, "subjects": {} }];
 
-    for (const major in data.major) {
+    for (const major of data.major) {
         /*  http://localhost:8000/api/courses/eligible/?studentData=
          * {"currentClasses":[],"completedClasses":["COM SCI 180", "MATH 32A", "MATH 32B", "MATH 61", "MATH 31B", "MATH 31A", "PHYSICS 1A"],"major":["COM SCI"]}
          */
-        const majorData = await Majors.byName(data.major[major]);
+        const majorData = await Majors.byName(major);
         const avaliableClasses = (majorData.length === 0 ? {} : majorData[0].toObject().courses);
-
         for (const subject in avaliableClasses) {
-            for (const currentEntry in avaliableClasses[subject]) {
+            for (const currentEntry of avaliableClasses[subject]) {
                 let coursesToCheck = [];
 
-                if (avaliableClasses[subject][currentEntry].includes("-")) {
+                if (currentEntry.includes("-")) {
                     const possibleRange = (await DetailedClass.bySubjectAreaAbbreviation(subject)).map(c => c.toObject()["Name"]).sort();
-                    let classNum = avaliableClasses[subject][currentEntry].split("-").map(x => subject + " " + x);
+                    let classNum = currentEntry.split("-").map(x => subject + " " + x);
 
                     for (const possibleEntry of possibleRange) {
                         if (possibleEntry >= classNum[0] && possibleEntry < classNum[1]) {
                             coursesToCheck.push(possibleEntry);
+                        } else if (possibleEntry > classNum[1]) {
+                            break;
                         }
                     }
-
                 } else {
-                    coursesToCheck = [subject + " " + avaliableClasses[subject][currentEntry]];
+                    coursesToCheck = [subject + " " + currentEntry];
                 }
-                // console.log(coursesToCheck);
-                for (const course in coursesToCheck) {
-                    // console.log(coursesToCheck[course]);
-                    let currCourse = await DetailedClass.byName(coursesToCheck[course]);
+
+                for (const course of coursesToCheck) {
+                    let currCourse = await DetailedClass.byName(course);
                     // Class not offered/found this quarter (invalid short name or missing from database)
                     if (currCourse.length === 0) {
-                        // console.log(coursesToCheck[course] + " not offered this quarter");
+                        // console.log(course + " not offered this quarter");
                     } else {
                         currCourse = currCourse[0];
                         let addCourse = true;
+
                         // Check if class is already completed or in progress
                         if (completedClasses.hasOwnProperty(currCourse["Name"]) || currentClasses.hasOwnProperty(currCourse["Name"])) {
                             addCourse = false;
                         }
+
                         for (const course in currCourse["Enforced Prerequisites"]) {
                             if (!addCourse) {
                                 break;
@@ -87,6 +90,8 @@ controller.getEligible = async (req, res) => {
                                 break;
                             }
                         }
+
+
                         for (const course in currCourse["Enforced Corequisites"]) {
                             if (!addCourse) {
                                 break;
