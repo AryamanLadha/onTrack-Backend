@@ -1,5 +1,6 @@
 import Classes from "./../models/Classes.js"
 import DetailedClass from "./../models/DetailedClass.js"
+import Majors from '../models/Majors.js';
 
 const controller = {};
 
@@ -42,14 +43,9 @@ controller.getEligible = async (req, res) => {
     for (const major in data.major) {
         /*  http://localhost:8000/api/courses/eligible/?studentData=
          * {"currentClasses":[],"completedClasses":["COM SCI 180", "MATH 32A", "MATH 32B", "MATH 61", "MATH 31B", "MATH 31A", "PHYSICS 1A"],"major":["COM SCI"]}
-         * TODO: get valid courses for data.majors[major] (using fake data for now)
          */
-
-        const avaliableClasses = {
-            "COM SCI": ["COM SCI 180-185", "COM SCI 31-33"],
-            "PHYSICS": ["PHYSICS 4AL", "PHYSICS 1A", "PHYSICS 1B", "PHYSICS 1C"]
-        }
-
+        const majorData = await Majors.byName(data.major[major]);
+        const avaliableClasses = (majorData.length === 0 ? {} : majorData[0].toObject().courses);
         for (const subject in avaliableClasses) {
             for (const currentEntry in avaliableClasses[subject]) {
                 let coursesToCheck = [];
