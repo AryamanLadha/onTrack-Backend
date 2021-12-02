@@ -48,66 +48,64 @@ controller.getEligible = async (req, res) => {
          */
         const majorData = await Majors.byName(major);
         const avaliableClasses = (majorData.length === 0 ? {} : majorData[0].toObject().courses);
-        for (const subject in avaliableClasses) {
-            for (const currentEntry of avaliableClasses[subject]) {
-                let coursesToCheck = [];
 
+        for (const subject in avaliableClasses) {
+            let coursesToCheck = [];
+            for (const currentEntry of avaliableClasses[subject]) {
                 if (currentEntry.includes("-")) {
                     const possibleRange = (await DetailedClass.bySubjectAreaAbbreviation(subject)).map(c => c.toObject()["Name"]).sort();
                     let classNum = currentEntry.split("-").map(x => subject + " " + x);
 
                     for (const possibleEntry of possibleRange) {
                         if (possibleEntry >= classNum[0] && possibleEntry < classNum[1]) {
-                            coursesToCheck.push(possibleEntry);
+                            if (!coursesToCheck.includes(possibleEntry)) {
+                                coursesToCheck.push(possibleEntry);
+                            }
                         } else if (possibleEntry > classNum[1]) {
                             break;
                         }
                     }
                 } else {
-                    coursesToCheck = [subject + " " + currentEntry];
+                    coursesToCheck.push(subject + " " + currentEntry);
                 }
+            }
+            for (const course of coursesToCheck) {
+                let currCourse = await DetailedClass.byName(course);
+                // Class not offered/found this quarter (invalid short name or missing from database)
+                if (currCourse.length === 0) {
+                    // console.log(course + " not offered this quarter");
+                } else {
+                    currCourse = currCourse[0];
+                    let addCourse = true;
 
-                for (const course of coursesToCheck) {
-                    let currCourse = await DetailedClass.byName(course);
-                    // Class not offered/found this quarter (invalid short name or missing from database)
-                    if (currCourse.length === 0) {
-                        // console.log(course + " not offered this quarter");
-                    } else {
-                        currCourse = currCourse[0];
-                        let addCourse = true;
-
-                        // Check if class is already completed or in progress
-                        if (completedClasses.hasOwnProperty(currCourse["Name"]) || currentClasses.hasOwnProperty(currCourse["Name"])) {
+                    // Check if class is already completed or in progress
+                    if (completedClasses.hasOwnProperty(currCourse["Name"]) || currentClasses.hasOwnProperty(currCourse["Name"])) {
+                        addCourse = false;
+                    }
+                    for (const course in currCourse["Enforced Prerequisites"]) {
+                        if (!addCourse) {
+                            break;
+                        }
+                        if (!completedClasses.hasOwnProperty(currCourse["Enforced Prerequisites"][course])) {
                             addCourse = false;
+                            break;
                         }
-
-                        for (const course in currCourse["Enforced Prerequisites"]) {
-                            if (!addCourse) {
-                                break;
-                            }
-                            if (!completedClasses.hasOwnProperty(currCourse["Enforced Prerequisites"][course])) {
-                                addCourse = false;
-                                break;
-                            }
+                    }
+                    for (const course in currCourse["Enforced Corequisites"]) {
+                        if (!addCourse) {
+                            break;
                         }
-
-
-                        for (const course in currCourse["Enforced Corequisites"]) {
-                            if (!addCourse) {
-                                break;
-                            }
-                            if (!currentClasses.hasOwnProperty(currCourse["Enforced Corequisites"][course]) && !completedClasses.hasOwnProperty(currCourse["Enforced Corequisites"][course])) {
-                                addCourse = false;
-                                break;
-                            }
+                        if (!currentClasses.hasOwnProperty(currCourse["Enforced Corequisites"][course]) && !completedClasses.hasOwnProperty(currCourse["Enforced Corequisites"][course])) {
+                            addCourse = false;
+                            break;
                         }
+                    }
 
-                        if (addCourse) {
-                            if (eligibleClasses[0].subjects.hasOwnProperty(subject)) {
-                                eligibleClasses[0].subjects[subject].push(currCourse["Name"]);
-                            } else {
-                                eligibleClasses[0].subjects[subject] = [currCourse["Name"]];
-                            }
+                    if (addCourse) {
+                        if (eligibleClasses[0].subjects.hasOwnProperty(subject)) {
+                            eligibleClasses[0].subjects[subject].push(currCourse["Name"]);
+                        } else {
+                            eligibleClasses[0].subjects[subject] = [currCourse["Name"]];
                         }
                     }
                 }
