@@ -4,12 +4,12 @@ import DetailedClass from "./../models/DetailedClass.js"
 const controller = {};
 
 controller.getAll = async (req, res) => {
-    res.send((await Classes.find())[0].toObject().courses);
+    res.json((await Classes.find())[0].toObject().courses);
 }
 
 controller.getSingle = async (req, res) => {
     const data = await DetailedClass.byName(req.params.course);
-    res.send(data.length === 0 ? {} : data[0].toObject());
+    res.json(data.length === 0 ? {} : data[0].toObject());
 }
 
 controller.getEligible = async (req, res) => {
@@ -108,7 +108,7 @@ controller.getEligible = async (req, res) => {
             }
         }
     }
-    res.send(JSON.stringify(eligibleClasses));
+    res.json(eligibleClasses);
 }
 
 export default controller;
