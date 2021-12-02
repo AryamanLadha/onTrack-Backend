@@ -82,20 +82,20 @@ controller.getEligible = async (req, res) => {
                     if (completedClasses.hasOwnProperty(currCourse["Name"]) || currentClasses.hasOwnProperty(currCourse["Name"])) {
                         addCourse = false;
                     }
-                    for (const course in currCourse["Enforced Prerequisites"]) {
+                    for (const course of currCourse["Enforced Prerequisites"]) {
                         if (!addCourse) {
                             break;
                         }
-                        if (!completedClasses.hasOwnProperty(currCourse["Enforced Prerequisites"][course])) {
+                        if (!completedClasses.hasOwnProperty(course)) {
                             addCourse = false;
                             break;
                         }
                     }
-                    for (const course in currCourse["Enforced Corequisites"]) {
+                    for (const course of currCourse["Enforced Corequisites"]) {
                         if (!addCourse) {
                             break;
                         }
-                        if (!currentClasses.hasOwnProperty(currCourse["Enforced Corequisites"][course]) && !completedClasses.hasOwnProperty(currCourse["Enforced Corequisites"][course])) {
+                        if (!currentClasses.hasOwnProperty(course) && !completedClasses.hasOwnProperty(course)) {
                             addCourse = false;
                             break;
                         }
