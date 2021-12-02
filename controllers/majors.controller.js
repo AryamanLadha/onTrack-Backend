@@ -1,34 +1,13 @@
+import Majors from '../models/Majors.js';
 const controller = {};
 
 controller.getAll = async (req, res) => {
-    res.json({
-        "majors": [
-            {
-                "name": "Mathematics",
-                "abbreviation": "MATH",
-                "subjects": ["test"]
-            },
-            {
-                "name": "Physics",
-                "abbreviation": "PHYSICS",
-                "subjects": ["test"]
-            },
-            {
-                "name": "Computer Science",
-                "abbreviation": "COM SCI",
-                "subjects": ["test"]
-            },
-            {
-                "name": "Cognitive Science",
-                "abbreviation": "COG SCI",
-                "subjects": ["Computer Science", "Psychology"]
-            }
-        ]
-    });
+    res.json((await Majors.find({})).map(major => major.toObject().name));
 }
 
 controller.getSingle = async (req, res) => {
-    res.send("NOT IMPLEMENTED: get single major");
+    const data = await Majors.byName(req.params.major);
+    res.json(data.length === 0 ? {} : data[0].toObject());
 }
 
 export default controller;
