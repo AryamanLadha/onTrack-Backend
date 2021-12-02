@@ -46,22 +46,27 @@ controller.getEligible = async (req, res) => {
          */
         const majorData = await Majors.byName(data.major[major]);
         const avaliableClasses = (majorData.length === 0 ? {} : majorData[0].toObject().courses);
+
         for (const subject in avaliableClasses) {
             for (const currentEntry in avaliableClasses[subject]) {
                 let coursesToCheck = [];
 
                 if (avaliableClasses[subject][currentEntry].includes("-")) {
-                    let classNum = avaliableClasses[subject][currentEntry].split(" ");
-                    classNum = classNum[classNum.length - 1].split("-");
-                    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/from
-                    const range = (start, stop, step) =>
-                        Array.from({ length: (stop - start) / step + 1 }, (_, i) => subject + " " + (start + (i * step)));
-                    coursesToCheck = range(parseInt(classNum[0]), parseInt(classNum[1]), 1);
-                } else {
-                    coursesToCheck = [avaliableClasses[subject][currentEntry]];
-                }
+                    const possibleRange = (await DetailedClass.bySubjectAreaAbbreviation(subject)).map(c => c.toObject()["Name"]).sort();
+                    let classNum = avaliableClasses[subject][currentEntry].split("-").map(x => subject + " " + x);
 
+                    for (const possibleEntry of possibleRange) {
+                        if (possibleEntry >= classNum[0] && possibleEntry < classNum[1]) {
+                            coursesToCheck.push(possibleEntry);
+                        }
+                    }
+
+                } else {
+                    coursesToCheck = [subject + " " + avaliableClasses[subject][currentEntry]];
+                }
+                // console.log(coursesToCheck);
                 for (const course in coursesToCheck) {
+                    // console.log(coursesToCheck[course]);
                     let currCourse = await DetailedClass.byName(coursesToCheck[course]);
                     // Class not offered/found this quarter (invalid short name or missing from database)
                     if (currCourse.length === 0) {
