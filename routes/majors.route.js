@@ -1,7 +1,8 @@
 import express from "express";
-import controller from "../controllers/majors.controller.js"
+import controller from "../controllers/majors.controller.js";
 const router = express.Router();
 
+// majors has getAll and getSingle options.
 router.get("/", controller.getAll);
 router.get("/:major", controller.getSingle);
 
