@@ -6,12 +6,23 @@ const router = express.Router();
 
 // Courses has getAll, getSingle, and getEligible options.
 
-router.post("/", passport.authenticate("google", {
+router.get(
+  "/google",
+  passport.authenticate("google", {
     scope: ["profile", "email"],
-    successRedirect: "/",
-    failureRedirect: "/login"
-}));
+  })
+);
 
-// router.get("/auth/redirect", controller.authRedirect);
+router.get(
+  "/google/callback",
+  passport.authenticate("google", { failureRedirect: "/login" }),
+  function (req, res) {
+    //sucessfully authenticated, redirecting secrets.
+    res.redirect("http://localhost:8000/api/auth/google/callback");
+  }
+);
 
+router.get("/logout", function (req, res) {
+  res.redirect("http://localhost:8000/api/auth/google/callback");
+});
 export default router;

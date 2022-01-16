@@ -4,14 +4,25 @@ import mongoose from "mongoose";
 import routes from "./routes/index.js";
 import helmet from "helmet";
 import passport from "passport";
-import oauth2 from "passport-openid-oauth20"
+import googleOauth2 from "passport-google-oauth20";
 import session from "express-session";
 
 const app = express();
 const port = process.env.PORT || 8000;
-const OpenIdOAuth2Strategy = oauth2.Strategy;
+const GoogleStrategy = googleOauth2.Strategy;
 
-dotenv.config();
+dotenv.config({ path: "./process.env" });
+
+// Authentication configuration
+app.use(
+  session({
+    resave: false,
+    saveUninitialized: false,
+    secret: "super secret password that i definitely will remember to change",
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Connect to database
 mongoose
@@ -29,33 +40,39 @@ app.use((req, res, next) => {
   next();
 });
 
+passport.serializeUser(function (user, done) {
+  done(null, user.id);
+});
+passport.deserializeUser(function (id, done) {
+  User.findById(id, function (err, user) {
+    done(err, user);
+  });
+});
+// Configure passport for user authentication with Google Oauth 2.0
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      authorizationURL: "https://accounts.google.com/o/oauth2/v2/auth",
+      tokenURL: "https://www.googleapis.com/oauth2/v4/token",
+      userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
+      callbackURL: "http://localhost:8000/api/auth/google/callback",
+    },
+    function (accessToken, refreshToken, profile, done) {
+      User.findOrCreate(
+        { googleId: profile.id, username: profile.id },
+        function (err, user) {
+          return done(err, user);
+        }
+      );
+    }
+  )
+);
+
 app.use(helmet()); // Helmet adds http headers to boost security of express apps
 app.use(express.json());
 app.use("/api", routes); // Routes defined in routes/index.js
-
-// Authentication configuration
-app.use(session({
-  resave: false,
-  saveUninitialized: true,
-  secret: 'super secret password that i definitely will remember to change'
-}));
-
-app.use(passport.initialize());
-app.use(passport.session());
-
-// Configure passport for user authentication with Google Oauth 2.0
-passport.use("google", new OpenIdOAuth2Strategy({
-  clientID: process.env.GOOGLE_CLIENT_ID,
-  clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-  authorizationURL: "https://accounts.google.com/o/oauth2/v2/auth",
-  tokenURL: "https://www.googleapis.com/oauth2/v4/token",
-  userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
-  callbackURL: "http://localhost:8000/api/auth/",
-}, function (request, accessToken, refreshToken, profile, done) {
-  // TODO: Create user in DB (also do the checking for if they exist)
-  return done(null, user);
-}));
-
 
 app.listen(port, () => {
   console.log(`App listening on port ${port}!`);
