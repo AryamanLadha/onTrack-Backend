@@ -4,31 +4,32 @@ import Majors from "../models/Majors.js";
 
 const controller = {};
 
-//retrieves all documents in Classes model, since all in one document, get index 0,
-//convert to js object, get courses attribute, which is object containing all courses
+/* Retrieves all documents in Classes model. Get index 0 of the single AllClasses array.
+ * Returns the array containing all courses
+*/
 controller.getAll = async (req, res) => {
   res.json((await Classes.find())[0].toObject().courses);
 };
 
-//retrieve single course by name
+// Retrieves a single course by short name
 controller.getSingle = async (req, res) => {
   const data = await DetailedClass.byName(req.params.course);
   res.json(data.length === 0 ? {} : data[0].toObject());
 };
 
-//retrieve all eligible courses using previous classes and major reqs from DARS.
+// Retrieve all eligible courses based on previous classes and reqs in different subject areas from DARS.
 controller.getEligible = async (req, res) => {
   const currQuarter = (async () => {
-    //fix this code later
+    // TODO: Test and implement the date functionality correctly
     const d = new Date();
     const quarter =
       d.getMonth() + 1 >= 2 && d.getMonth() + 1 <= 4
         ? "Spring"
         : d.getMonth() + 1 >= 5 && d.getMonth() + 1 <= 6
-        ? "Summer"
-        : d.getMonth() + 1 >= 7 && d.getMonth() + 1 <= 9
-        ? "Fall"
-        : "Winter";
+          ? "Summer"
+          : d.getMonth() + 1 >= 7 && d.getMonth() + 1 <= 9
+            ? "Fall"
+            : "Winter";
     const year = quarter === "Winter" ? d.getFullYear() + 1 : d.getFullYear();
     return quarter + " " + year;
   })();
@@ -40,7 +41,8 @@ controller.getEligible = async (req, res) => {
     res.status(400).send("Invalid JSON");
     return;
   }
-  //check if input data is correct, can be deleted after we begin saving student data
+
+  // Check if input data is valid, (can be deleted after we begin saving student data)
   if (
     !data.hasOwnProperty("completedClasses") ||
     !data.hasOwnProperty("currentClasses") ||
@@ -52,10 +54,10 @@ controller.getEligible = async (req, res) => {
     res.status(400).send("Invalid JSON");
     return;
   }
-  // if student has completed classes, loop through list of classes and adds current class as key with value 0
-  // essentially, turn array into single object with key = course name and value = 0
-  // same for currentClasses
-  // all code below till end of file will change once we begin storing user data.
+  /* For the student's completed and current classes, rearrange the data as an object with 
+   * the short name as the key (value is set to 0) for constant time access when searching 
+   * for the preqs. (all code below will change once we begin storing user data or implement GraphQL)
+  */
   const completedClasses =
     data.completedClasses.length > 0
       ? data.completedClasses.reduce((a, v) => ({ ...a, [v]: 0 }), {})
@@ -77,6 +79,9 @@ controller.getEligible = async (req, res) => {
     for (const subject in avaliableClasses) {
       let coursesToCheck = [];
       for (const currentEntry of avaliableClasses[subject]) {
+        /* If a range of classes is given, break the range into 
+         * individual classes and add them to the coursesToCheck array
+        */
         if (currentEntry.includes("-")) {
           const possibleRange = (
             await DetailedClass.bySubjectAreaAbbreviation(subject)

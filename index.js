@@ -6,7 +6,7 @@ import helmet from "helmet";
 
 dotenv.config();
 
-// connect to database
+// Connect to database
 mongoose
   .connect(process.env.DB_URI)
   .then(() => console.log("Connected to mongoDB"))
@@ -14,7 +14,7 @@ mongoose
 const app = express();
 const port = process.env.PORT || 8000;
 
-//fix CORS missing
+// Fix CORS missing
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
@@ -24,12 +24,12 @@ app.use((req, res, next) => {
   next();
 });
 
-//helmet adds http headers to boost security of express apps
+// Helmet adds http headers to boost security of express apps
 app.use(helmet());
 
 app.use(express.json());
 
-//redirects to routes.index.js
+// Redirects to routes.index.js
 app.use("/api", routes);
 
 app.listen(port, () => {

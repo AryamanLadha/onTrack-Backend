@@ -1,13 +1,16 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
 
-//classes are defined with mongoose to validate scheme between Express and MongoDB.
-//each class contains a full name and a short name using the subject area abbreviation
+/* Classes are defined with mongoose to validate scheme between Express and MongoDB.
+* each class contains a full name and a short name using the subject area 
+* abbreviation and the class number/code, seperated by a space
+*/
 const classesSchema = new Schema({
   fullName: String,
   shortName: String,
 });
-//static functions used as helper functions.
+
+// Static functions are used as helper functions to retrieve specifc documents from the database
 classesSchema.statics.byFullName = (name) => {
   return this.where({ fullName: name });
 };
@@ -15,7 +18,7 @@ classesSchema.statics.byFullName = (name) => {
 classesSchema.statics.byShortName = (name) => {
   return this.where({ shortName: name });
 };
-//first argument is name of model, second is schema for model, third is name of collection storing the model.
+// First argument is name of model, second is schema for model, third is name of collection storing the model.
 const Classes = mongoose.model("Classes", classesSchema, "AllCourses");
 
 export default Classes;
