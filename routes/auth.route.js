@@ -9,7 +9,7 @@ const router = express.Router();
 router.get(
   "/google",
   passport.authenticate("google", {
-    scope: ["profile"],
+    scope: ["profile", "email"],
   })
 );
 
@@ -20,11 +20,15 @@ router.get(
   }),
   function (req, res) {
     //sucessfully authenticated, redirecting secrets.
-    res.redirect("/callback");
+    res.redirect("/");
   }
 );
 
 router.get("/logout", function (req, res) {
-  res.redirect("/callback");
+  req.session = null;
+  req.logout();
+  res.redirect("/");
 });
+
+router.get("/data", controller.getData);
 export default router;

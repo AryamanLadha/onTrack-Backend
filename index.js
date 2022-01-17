@@ -7,6 +7,7 @@ import passport from "passport";
 import googleOauth2 from "passport-google-oauth20";
 import session from "express-session";
 import User from "./models/Users.js";
+import cookieSession from "cookie-session";
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -14,12 +15,18 @@ const GoogleStrategy = googleOauth2.Strategy;
 
 dotenv.config();
 
+//Configure Session Storage
+app.use(cookieSession({
+  name: 'session-name',
+  keys: [process.env.COOKIE_SESSION_SECRET1, process.env.COOKIE_SESSION_SECRET2],
+}))
+
 // Authentication configuration
 app.use(
   session({
     resave: false,
     saveUninitialized: false,
-    secret: "super secret password that i definitely will remember to change",
+    secret: process.env.EXPRESS_SECRET
   })
 );
 app.use(passport.initialize());
@@ -65,7 +72,8 @@ passport.use(
       callbackURL: "http://localhost:8000/api/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
-      User.findOrCreate({ googleId: profile.id }, function (err, user) {
+      console.log(profile);
+      User.findOrCreate({ email: profile.emails[0].value, googleId: profile.id }, function (err, user) {
         return done(err, user);
       });
     }

@@ -10,7 +10,6 @@ const coursesTakenSchema = new Schema({
 const userSchema = new Schema({
   email: String,
   googleId: String,
-  secret: String,
   fullName: { type: String, default: "" },
   majors: [String],
   dates: {
