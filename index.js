@@ -6,12 +6,13 @@ import helmet from "helmet";
 import passport from "passport";
 import googleOauth2 from "passport-google-oauth20";
 import session from "express-session";
+import User from "./models/Users.js";
 
 const app = express();
 const port = process.env.PORT || 8000;
 const GoogleStrategy = googleOauth2.Strategy;
 
-dotenv.config({ path: "./process.env" });
+dotenv.config();
 
 // Authentication configuration
 app.use(
@@ -24,6 +25,10 @@ app.use(
 app.use(passport.initialize());
 app.use(passport.session());
 
+app.use(function (req, res, next) {
+  res.locals.user = req.user || null;
+  next();
+});
 // Connect to database
 mongoose
   .connect(process.env.DB_URI)
@@ -59,13 +64,10 @@ passport.use(
       userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
       callbackURL: "http://localhost:8000/api/auth/google/callback",
     },
-    function (accessToken, refreshToken, profile, done) {
-      User.findOrCreate(
-        { googleId: profile.id, username: profile.id },
-        function (err, user) {
-          return done(err, user);
-        }
-      );
+    async (accessToken, refreshToken, profile, done) => {
+      User.findOrCreate({ googleId: profile.id }, function (err, user) {
+        return done(err, user);
+      });
     }
   )
 );

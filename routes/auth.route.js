@@ -9,20 +9,22 @@ const router = express.Router();
 router.get(
   "/google",
   passport.authenticate("google", {
-    scope: ["profile", "email"],
+    scope: ["profile"],
   })
 );
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", { failureRedirect: "/login" }),
+  passport.authenticate("google", {
+    failureRedirect: "/login",
+  }),
   function (req, res) {
     //sucessfully authenticated, redirecting secrets.
-    res.redirect("http://localhost:8000/api/auth/google/callback");
+    res.redirect("/callback");
   }
 );
 
 router.get("/logout", function (req, res) {
-  res.redirect("http://localhost:8000/api/auth/google/callback");
+  res.redirect("/callback");
 });
 export default router;

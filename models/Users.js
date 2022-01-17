@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 const { Schema } = mongoose;
-
+import passportLocalMongoose from "passport-local-mongoose";
+import findOrCreate from "mongoose-findorcreate";
 // defined by quarter
 const coursesTakenSchema = new Schema({
   quarter: { type: String, default: "" },
@@ -39,6 +40,9 @@ userSchema.statics.findByMajor = (major) => {
 userSchema.statics.findByMajorAndYear = (major, year) => {
   return this.find({ major: major, currentYear: year });
 };
+userSchema.plugin(passportLocalMongoose);
+userSchema.plugin(findOrCreate);
+
 // First argument is name of model, second is schema for model, third is name of collection storing the model.
 const User = new mongoose.model("User", userSchema, "Users");
 export default User;
