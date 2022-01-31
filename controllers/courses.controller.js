@@ -142,10 +142,19 @@ controller.getEligible = async (req, res) => {
           }
 
           if (addCourse) {
+
+            const courseObj = {
+              Name: currCourse["Name"],
+              Description: currCourse["Description"],
+              Units: currCourse["Units"],
+              "Enforced Corequisites": currCourse["Enforced Corequisites"],
+              Restrictions: currCourse["Restrictions"]
+            }
+
             if (eligibleClasses[0].subjects.hasOwnProperty(subject)) {
-              eligibleClasses[0].subjects[subject].push(currCourse["Name"]);
+              eligibleClasses[0].subjects[subject].push(courseObj);
             } else {
-              eligibleClasses[0].subjects[subject] = [currCourse["Name"]];
+              eligibleClasses[0].subjects[subject] = [courseObj];
             }
           }
         }
