@@ -16,17 +16,22 @@ const GoogleStrategy = googleOauth2.Strategy;
 dotenv.config();
 
 //Configure Session Storage
-app.use(cookieSession({
-  name: 'session-name',
-  keys: [process.env.COOKIE_SESSION_SECRET1, process.env.COOKIE_SESSION_SECRET2],
-}))
+app.use(
+  cookieSession({
+    name: "session-name",
+    keys: [
+      process.env.COOKIE_SESSION_SECRET1,
+      process.env.COOKIE_SESSION_SECRET2,
+    ],
+  })
+);
 
 // Authentication configuration
 app.use(
   session({
     resave: false,
     saveUninitialized: false,
-    secret: process.env.EXPRESS_SECRET
+    secret: process.env.EXPRESS_SECRET,
   })
 );
 app.use(passport.initialize());
@@ -73,9 +78,12 @@ passport.use(
     },
     async (accessToken, refreshToken, profile, done) => {
       console.log(profile);
-      User.findOrCreate({ email: profile.emails[0].value, googleId: profile.id }, function (err, user) {
-        return done(err, user);
-      });
+      User.findOrCreate(
+        { email: profile.emails[0].value, googleId: profile.id },
+        function (err, user) {
+          return done(err, user);
+        }
+      );
     }
   )
 );

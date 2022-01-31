@@ -4,8 +4,7 @@ import passport from "passport";
 
 const router = express.Router();
 
-// Courses has getAll, getSingle, and getEligible options.
-
+// authentication endpoint
 router.get(
   "/google",
   passport.authenticate("google", {
@@ -13,6 +12,7 @@ router.get(
   })
 );
 
+//this is used from backend, nothing to do with frontend
 router.get(
   "/google/callback",
   passport.authenticate("google", {
@@ -24,6 +24,7 @@ router.get(
   }
 );
 
+//logout endpoint
 router.get("/logout", function (req, res) {
   req.session = null;
   req.logout();
