@@ -19,7 +19,7 @@ router.get(
     failureRedirect: "/login",
   }),
   function (req, res) {
-    //sucessfully authenticated, redirecting secrets.
+    // Sucessfully authenticated
     res.redirect("/");
   }
 );
@@ -30,5 +30,6 @@ router.get("/logout", function (req, res) {
   res.redirect("/");
 });
 
-router.get("/data", controller.getData);
+router.get("/data", controller.getUserData);
+router.put("/update", controller.updateUserData);
 export default router;
