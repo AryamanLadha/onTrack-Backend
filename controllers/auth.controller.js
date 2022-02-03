@@ -15,7 +15,6 @@ controller.updateUserData = async (req, res) => {
 
   // Check if the user is signed in
   if (user) {
-    console.log(user.googleId, userData);
     //function to update user data based on ID
     User.findOneAndUpdate({ googleId: user.googleId }, userData, (err) => {
       if (err) {
@@ -25,7 +24,6 @@ controller.updateUserData = async (req, res) => {
       }
       // err ? console.log(err) : console.log("Successfully updated user data")
     });
-    res.send("finished");
   } else {
     return res.status(401).send("Unauthorized");
   }
