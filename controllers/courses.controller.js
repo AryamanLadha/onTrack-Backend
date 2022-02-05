@@ -8,7 +8,7 @@ const controller = {};
  * Returns the array containing all courses
  */
 controller.getAll = async (req, res) => {
-  res.json((await Classes.find()));
+  res.json((await Classes.find({}, { "_id": false })));
 };
 
 // Retrieves a single course by short name

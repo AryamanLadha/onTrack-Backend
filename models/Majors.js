@@ -7,7 +7,7 @@ const majorsSchema = new Schema({
 });
 
 majorsSchema.statics.byName = function (majorName) {
-  return this.where({ name: majorName });
+  return this.find({ name: majorName }, { _id: false });
 };
 
 const Majors = mongoose.model("Majors", majorsSchema, "Majors");
