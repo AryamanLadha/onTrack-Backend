@@ -4,33 +4,14 @@ import passport from "passport";
 
 const router = express.Router();
 
-// authentication endpoint
-router.get(
-  "/google",
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
-  })
-);
+// Authentication endpoint
+router.get("/google", controller.authGoogle);
 
-//this is used from backend, nothing to do with frontend
-router.get(
-  "/google/callback",
-  passport.authenticate("google", {
-    failureRedirect: "/login",
-  }),
-  function (req, res) {
-    // Sucessfully authenticated
-    res.redirect("/");
-  }
-);
+// This is used for backend, nothing to do with frontend
+router.get("/google/callback", controller.authGoogleCallback);
 
-//logout endpoint
-router.get("/logout", function (req, res) {
-  req.session = null;
-  req.logout();
-  res.redirect("/");
-});
-
+router.get("/logout", controller.logout);
 router.get("/data", controller.getUserData);
 router.put("/update", controller.updateUserData);
+
 export default router;

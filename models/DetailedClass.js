@@ -17,7 +17,7 @@ const DetailedClassSchema = new Schema({
 
 // Helper functions to get specific documents from the database
 DetailedClassSchema.statics.byName = function (name) {
-  return this.where({ Name: name });
+  return this.find({ Name: name }, { "_id": false });
 };
 
 DetailedClassSchema.statics.bySubjectAreaAbbreviation = function (subjectArea) {

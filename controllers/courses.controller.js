@@ -4,11 +4,11 @@ import Majors from "../models/Majors.js";
 
 const controller = {};
 
-/* Retrieves all documents in Classes model. Get index 0 of the single AllClasses array.
+/* Retrieves all documents in Classes model.
  * Returns the array containing all courses
  */
 controller.getAll = async (req, res) => {
-  res.json((await Classes.find())[0].toObject().courses);
+  res.json((await Classes.find({}, { "_id": false })));
 };
 
 // Retrieves a single course by short name
@@ -26,10 +26,10 @@ controller.getEligible = async (req, res) => {
       d.getMonth() + 1 >= 2 && d.getMonth() + 1 <= 4
         ? "Spring"
         : d.getMonth() + 1 >= 5 && d.getMonth() + 1 <= 6
-        ? "Summer"
-        : d.getMonth() + 1 >= 7 && d.getMonth() + 1 <= 9
-        ? "Fall"
-        : "Winter";
+          ? "Summer"
+          : d.getMonth() + 1 >= 7 && d.getMonth() + 1 <= 9
+            ? "Fall"
+            : "Winter";
     const year = quarter === "Winter" ? d.getFullYear() + 1 : d.getFullYear();
     return quarter + " " + year;
   })();
