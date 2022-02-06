@@ -24,20 +24,21 @@ DetailedClassSchema.statics.bySubjectAreaAbbreviation = function (subjectArea) {
   return this.find({ "Subject Area Abbreviation": subjectArea });
 };
 
-// Helper function to find eligibleClasses
+// Helper function to find eligibleClasses: mongoDB aggregate 
 DetailedClassSchema.statics.byClassesTaken = function (coursesToCheck, classesTaken) {
   return this.aggregate([
-      //first stage:
+      //first stage: find all the eligible classes 
       {
         $match:{
           "Name": {$in:coursesToCheck},
           "Enforced Prerequisites":{$not:{$elemMatch:{$nin:classesTaken}}}
         }
       },
-      //second stage
+      //second stage: filter out classes already taken
       {
         $match:{"Name": {$nin: classesTaken}}
       },
+      // third stage: organize classes data by subject
       {
         $group:{
           _id: "$Subject Area Abbreviation",
