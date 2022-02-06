@@ -23,6 +23,30 @@ DetailedClassSchema.statics.byName = function (name) {
 DetailedClassSchema.statics.bySubjectAreaAbbreviation = function (subjectArea) {
   return this.find({ "Subject Area Abbreviation": subjectArea });
 };
+
+// Helper function to find eligibleClasses
+DetailedClassSchema.statics.byClassesTaken = function (coursesToCheck, classesTaken) {
+  return this.aggregate([
+      //first stage:
+      {
+        $match:{
+          "Name": {$in:coursesToCheck},
+          "Enforced Prerequisites":{$not:{$elemMatch:{$nin:classesTaken}}}
+        }
+      },
+      //second stage
+      {
+        $match:{"Name": {$nin: classesTaken}}
+      },
+      {
+        $group:{
+          _id: "$Subject Area Abbreviation",
+          classes: {$push: "$Name"}
+        }
+      }
+    ]);
+};
+
 // First argument is name of model, second is schema for model, third is name of collection storing the model.
 const DetailedClass = mongoose.model(
   "CoursesOffered",

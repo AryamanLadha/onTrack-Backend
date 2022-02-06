@@ -7,11 +7,13 @@ const coursesTakenSchema = new Schema({
   quarter: { type: String, default: "" },
   courses: [String],
 });
+
 const userSchema = new Schema({
   email: String,
   googleId: String,
   fullName: { type: String, default: "" },
   majors: [String],
+  minors: [String],
   dates: {
     quarterEntered: { type: String, default: "" },
     quarterExpectedGraduation: { type: String, default: "" },

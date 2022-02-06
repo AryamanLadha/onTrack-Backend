@@ -68,6 +68,8 @@ controller.getEligible = async (req, res) => {
       : {};
   const eligibleClasses = [{ quarter: await currQuarter, subjects: {} }];
 
+  const coursesToCheck = [];
+
   for (const major of data.major) {
     /*  http://localhost:8000/api/courses/eligible/?studentData=
      * {"currentClasses":[],"completedClasses":["COM SCI 180", "MATH 32A", "MATH 32B", "MATH 61", "MATH 31B", "MATH 31A", "PHYSICS 1A"],"major":["COM SCI"]}
@@ -77,7 +79,7 @@ controller.getEligible = async (req, res) => {
       majorData.length === 0 ? {} : majorData[0].toObject().courses;
 
     for (const subject in avaliableClasses) {
-      let coursesToCheck = [];
+      // let coursesToCheck = [];
       for (const currentEntry of avaliableClasses[subject]) {
         /* If a range of classes is given, break the range into 
          * individual classes and add them to the coursesToCheck array
@@ -101,57 +103,78 @@ controller.getEligible = async (req, res) => {
           }
         } else {
           coursesToCheck.push(subject + " " + currentEntry);
-        }
-      }
-      for (const course of coursesToCheck) {
-        let currCourse = await DetailedClass.byName(course);
-        // Class not offered/found this quarter (invalid short name or missing from database)
-        if (currCourse.length === 0) {
-          // console.log(course + " not offered this quarter");
-        } else {
-          currCourse = currCourse[0];
-          let addCourse = true;
+        };
+      };
+    };
+  };
+  console.log(data.completedClasses);
+  console.log(coursesToCheck);
+  console.log(completedClasses);
+  if (data.completedClasses.length >= 1){
+    let eligible = await DetailedClass.byClassesTaken(coursesToCheck,data.completedClasses);
+    console.log(eligible);
+    eligibleClasses[0] = eligible;
 
-          // Check if class is already completed or in progress
-          if (
-            completedClasses.hasOwnProperty(currCourse["Name"]) ||
-            currentClasses.hasOwnProperty(currCourse["Name"])
-          ) {
-            addCourse = false;
-          }
-          for (const course of currCourse["Enforced Prerequisites"]) {
-            if (!addCourse) {
-              break;
-            }
-            if (!completedClasses.hasOwnProperty(course)) {
-              addCourse = false;
-              break;
-            }
-          }
-          for (const course of currCourse["Enforced Corequisites"]) {
-            if (!addCourse) {
-              break;
-            }
-            if (
-              !currentClasses.hasOwnProperty(course) &&
-              !completedClasses.hasOwnProperty(course)
-            ) {
-              addCourse = false;
-              break;
-            }
-          }
-
-          if (addCourse) {
-            if (eligibleClasses[0].subjects.hasOwnProperty(subject)) {
-              eligibleClasses[0].subjects[subject].push(currCourse["Name"]);
-            } else {
-              eligibleClasses[0].subjects[subject] = [currCourse["Name"]];
-            }
-          }
-        }
-      }
-    }
   }
+
+  
+
+
+      // loop through each course in courseToCheck
+      // for (const course of coursesToCheck) {
+      //   let currCourse = await DetailedClass.byName(course);
+      //   // Class not offered/found this quarter (invalid short name or missing from database)
+      //   if (currCourse.length === 0) {
+      //     // console.log(course + " not offered this quarter");
+      //   } else {
+      //     currCourse = currCourse[0];
+      //     let addCourse = true;
+
+      //     // Check if class is already completed or in progress
+      //     if (
+      //       completedClasses.hasOwnProperty(currCourse["Name"]) ||
+      //       currentClasses.hasOwnProperty(currCourse["Name"])
+      //     ) {
+      //       addCourse = false;
+      //     }
+
+      //     // 
+      //     for (const course of currCourse["Enforced Prerequisites"]) {
+      //       if (!addCourse) {
+      //         break;
+      //       }
+      //       if (!completedClasses.hasOwnProperty(course)) {
+      //         addCourse = false;
+      //         break;
+      //       }
+      //     }
+
+      //     //
+      //     for (const course of currCourse["Enforced Corequisites"]) {
+      //       if (!addCourse) {
+      //         break;
+      //       }
+      //       if (
+      //         !currentClasses.hasOwnProperty(course) &&
+      //         !completedClasses.hasOwnProperty(course)
+      //       ) {
+      //         addCourse = false;
+      //         break;
+      //       }
+      //     }
+
+      //     //
+      //     if (addCourse) {
+      //       if (eligibleClasses[0].subjects.hasOwnProperty(subject)) {
+      //         eligibleClasses[0].subjects[subject].push(currCourse["Name"]);
+      //       } else {
+      //         eligibleClasses[0].subjects[subject] = [currCourse["Name"]];
+      //       }
+      //     }
+      //   }
+      
+  
+  
   res.json(eligibleClasses);
 };
 
