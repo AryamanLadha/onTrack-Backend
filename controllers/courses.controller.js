@@ -66,9 +66,11 @@ controller.getEligible = async (req, res) => {
     data.currentClasses.length > 0
       ? data.currentClasses.reduce((a, v) => ({ ...a, [v]: 0 }), {})
       : {};
-  const eligibleClasses = [{ quarter: await currQuarter, subjects: {} }];
+  let eligibleClasses = [{ quarter: await currQuarter, subjects: {} }];
 
   const coursesToCheck = [];
+
+  console.log(eligibleClasses);
 
   for (const major of data.major) {
     /*  http://localhost:8000/api/courses/eligible/?studentData=
@@ -107,14 +109,11 @@ controller.getEligible = async (req, res) => {
       };
     };
   };
-  console.log(data.completedClasses);
-  console.log(coursesToCheck);
-  console.log(completedClasses);
+  
   if (data.completedClasses.length >= 1){
     let eligible = await DetailedClass.byClassesTaken(coursesToCheck,data.completedClasses);
     console.log(eligible);
-    eligibleClasses[0] = eligible;
-
+    eligibleClasses[0].subjects= eligible;
   }
 
   

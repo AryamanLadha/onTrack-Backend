@@ -38,11 +38,11 @@ DetailedClassSchema.statics.byClassesTaken = function (coursesToCheck, classesTa
       {
         $match:{"Name": {$nin: classesTaken}}
       },
-      // third stage: organize classes data by subject
+      // third stage: organize output data by subject
       {
         $group:{
           _id: "$Subject Area Abbreviation",
-          classes: {$push: "$Name"}
+          classes: {$push: "$Name", }
         }
       }
     ]);
