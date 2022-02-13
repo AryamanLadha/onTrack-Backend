@@ -2,12 +2,29 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 // Link to google docs documentation: https://docs.google.com/document/d/1xI37S21iuT8y78_eg1DViBFSYafCFuXF65Oq7Neu-w4/edit
+const DiscussionSchema = new Schema({
+  Section: String,
+  Instructor: String,
+  Location: String,
+  Time: String,
+  Days: String,
+});
+
+const LectureSchema = new Schema({
+  Section: String,
+  Professor: String,
+  Location: String,
+  Time: String,
+  Days: String,
+  Discussions: [DiscussionSchema],
+});
 const DetailedClassSchema = new Schema({
   Name: String,
   "Subject Area": String,
   "Subject Area Abbreviation": String,
   "Quarters Offered": [String],
   Units: String,
+  Lectures: [LectureSchema],
   "Enforced Prerequisites": [String],
   "Optional Prerequisites": [String],
   "Enforced Corequisites": [String],
@@ -17,7 +34,7 @@ const DetailedClassSchema = new Schema({
 
 // Helper functions to get specific documents from the database
 DetailedClassSchema.statics.byName = function (name) {
-  return this.find({ Name: name }, { "_id": false });
+  return this.find({ Name: name }, { _id: false });
 };
 
 DetailedClassSchema.statics.bySubjectAreaAbbreviation = function (subjectArea) {
