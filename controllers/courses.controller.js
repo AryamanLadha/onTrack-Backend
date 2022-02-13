@@ -8,7 +8,7 @@ const controller = {};
  * Returns the array containing all courses
  */
 controller.getAll = async (req, res) => {
-  res.json((await Classes.find({}, { "_id": false })));
+  res.json(await Classes.find({}, { _id: false }));
 };
 
 // Retrieves a single course by short name
@@ -26,10 +26,10 @@ controller.getEligible = async (req, res) => {
       d.getMonth() + 1 >= 2 && d.getMonth() + 1 <= 4
         ? "Spring"
         : d.getMonth() + 1 >= 5 && d.getMonth() + 1 <= 6
-          ? "Summer"
-          : d.getMonth() + 1 >= 7 && d.getMonth() + 1 <= 9
-            ? "Fall"
-            : "Winter";
+        ? "Summer"
+        : d.getMonth() + 1 >= 7 && d.getMonth() + 1 <= 9
+        ? "Fall"
+        : "Winter";
     const year = quarter === "Winter" ? d.getFullYear() + 1 : d.getFullYear();
     return quarter + " " + year;
   })();
@@ -87,7 +87,7 @@ controller.getEligible = async (req, res) => {
           const possibleRange = (
             await DetailedClass.bySubjectAreaAbbreviation(subject)
           )
-            .map((c) => c.toObject()["Name"])
+            .map((c) => c.toObject()["name"])
             .sort();
           let classNum = currentEntry.split("-").map((x) => subject + " " + x);
 
@@ -115,12 +115,12 @@ controller.getEligible = async (req, res) => {
 
           // Check if class is already completed or in progress
           if (
-            completedClasses.hasOwnProperty(currCourse["Name"]) ||
-            currentClasses.hasOwnProperty(currCourse["Name"])
+            completedClasses.hasOwnProperty(currCourse["name"]) ||
+            currentClasses.hasOwnProperty(currCourse["name"])
           ) {
             addCourse = false;
           }
-          for (const course of currCourse["Enforced Prerequisites"]) {
+          for (const course of currCourse["enforcedPrerequisites"]) {
             if (!addCourse) {
               break;
             }
@@ -129,7 +129,7 @@ controller.getEligible = async (req, res) => {
               break;
             }
           }
-          for (const course of currCourse["Enforced Corequisites"]) {
+          for (const course of currCourse["enforcedCorequisites"]) {
             if (!addCourse) {
               break;
             }
@@ -144,11 +144,11 @@ controller.getEligible = async (req, res) => {
 
           if (addCourse) {
             const courseObj = {
-              Name: currCourse["Name"],
-              Description: currCourse["Description"],
-              Units: currCourse["Units"],
-              "Enforced Corequisites": currCourse["Enforced Corequisites"],
-              Restrictions: currCourse["Restrictions"],
+              Name: currCourse["name"],
+              Description: currCourse["description"],
+              Units: currCourse["units"],
+              enforcedCorequisites: currCourse["enforcedCorequisites"],
+              Restrictions: currCourse["restrictions"],
             };
 
             if (eligibleClasses[0].subjects.hasOwnProperty(subject)) {
