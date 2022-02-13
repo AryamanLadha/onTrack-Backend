@@ -3,42 +3,42 @@ const { Schema } = mongoose;
 
 // Link to google docs documentation: https://docs.google.com/document/d/1xI37S21iuT8y78_eg1DViBFSYafCFuXF65Oq7Neu-w4/edit
 const DiscussionSchema = new Schema({
-  Section: String,
-  Instructor: String,
-  Location: String,
-  Time: String,
-  Days: String,
+  section: String,
+  instructor: String,
+  location: String,
+  time: String,
+  days: String,
 });
 
 const LectureSchema = new Schema({
-  Section: String,
-  Professor: String,
-  Location: String,
-  Time: String,
-  Days: String,
-  Discussions: [DiscussionSchema],
+  section: String,
+  professor: String,
+  location: String,
+  time: String,
+  days: String,
+  discussions: [DiscussionSchema],
 });
 const DetailedClassSchema = new Schema({
-  Name: String,
-  "Subject Area": String,
-  "Subject Area Abbreviation": String,
-  "Quarters Offered": [String],
-  Units: String,
-  Lectures: [LectureSchema],
-  "Enforced Prerequisites": [String],
-  "Optional Prerequisites": [String],
-  "Enforced Corequisites": [String],
-  Description: String,
-  Restrictions: String,
+  name: String,
+  subjectArea: String,
+  subjectAreaAbbreviation: String,
+  quartersOffered: [String],
+  units: String,
+  lectures: [LectureSchema],
+  enforcedPrerequisites: [String],
+  optionalPrerequisites: [String],
+  enforcedCorequisites: [String],
+  description: String,
+  restrictions: String,
 });
 
 // Helper functions to get specific documents from the database
 DetailedClassSchema.statics.byName = function (name) {
-  return this.find({ Name: name }, { _id: false });
+  return this.find({ name: name }, { _id: false });
 };
 
 DetailedClassSchema.statics.bySubjectAreaAbbreviation = function (subjectArea) {
-  return this.find({ "Subject Area Abbreviation": subjectArea });
+  return this.find({ subjectAreaAbbreviation: subjectArea });
 };
 // First argument is name of model, second is schema for model, third is name of collection storing the model.
 const DetailedClass = mongoose.model(
