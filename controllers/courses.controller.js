@@ -144,11 +144,11 @@ controller.getEligible = async (req, res) => {
 
           if (addCourse) {
             const courseObj = {
-              Name: currCourse["name"],
-              Description: currCourse["description"],
-              Units: currCourse["units"],
+              name: currCourse["name"],
+              description: currCourse["description"],
+              units: currCourse["units"],
               enforcedCorequisites: currCourse["enforcedCorequisites"],
-              Restrictions: currCourse["restrictions"],
+              restrictions: currCourse["restrictions"],
             };
 
             if (eligibleClasses[0].subjects.hasOwnProperty(subject)) {
