@@ -8,7 +8,7 @@ import googleOauth2 from "passport-google-oauth20";
 import session from "express-session";
 import User from "./models/Users.js";
 import cookieSession from "cookie-session";
-import morgan from "morgan"
+import morgan from "morgan";
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -79,7 +79,6 @@ passport.use(
       callbackURL: "http://localhost:8000/api/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
-
       User.findOrCreate({ googleId: profile.id }, function (err, user) {
         done(null, user);
       });
@@ -87,7 +86,7 @@ passport.use(
   )
 );
 
-app.use(morgan("dev")); // Log every request to the console for debugging 
+app.use(morgan("dev")); // Log every request to the console for debugging
 app.use(helmet()); // Helmet adds http headers to boost security of express apps
 app.use(express.json());
 app.use("/api", routes); // Routes defined in routes/index.js

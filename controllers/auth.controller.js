@@ -16,7 +16,7 @@ controller.logout = (req, res) => {
   req.session = null;
   req.logout();
   res.redirect("/");
-}
+};
 
 controller.getUserData = async (req, res) => {
   const { user } = req;
