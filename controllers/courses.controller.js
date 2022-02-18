@@ -110,68 +110,13 @@ controller.getEligible = async (req, res) => {
     };
   };
   
+  // using mongodb query operation to filter out all the eligible classes
   if (data.completedClasses.length >= 1){
     let eligible = await DetailedClass.byClassesTaken(coursesToCheck,data.completedClasses);
     console.log(eligible);
     eligibleClasses[0].subjects= eligible;
   }
 
-  
-
-
-      // loop through each course in courseToCheck
-      // for (const course of coursesToCheck) {
-      //   let currCourse = await DetailedClass.byName(course);
-      //   // Class not offered/found this quarter (invalid short name or missing from database)
-      //   if (currCourse.length === 0) {
-      //     // console.log(course + " not offered this quarter");
-      //   } else {
-      //     currCourse = currCourse[0];
-      //     let addCourse = true;
-
-      //     // Check if class is already completed or in progress
-      //     if (
-      //       completedClasses.hasOwnProperty(currCourse["Name"]) ||
-      //       currentClasses.hasOwnProperty(currCourse["Name"])
-      //     ) {
-      //       addCourse = false;
-      //     }
-
-      //     // 
-      //     for (const course of currCourse["Enforced Prerequisites"]) {
-      //       if (!addCourse) {
-      //         break;
-      //       }
-      //       if (!completedClasses.hasOwnProperty(course)) {
-      //         addCourse = false;
-      //         break;
-      //       }
-      //     }
-
-      //     //
-      //     for (const course of currCourse["Enforced Corequisites"]) {
-      //       if (!addCourse) {
-      //         break;
-      //       }
-      //       if (
-      //         !currentClasses.hasOwnProperty(course) &&
-      //         !completedClasses.hasOwnProperty(course)
-      //       ) {
-      //         addCourse = false;
-      //         break;
-      //       }
-      //     }
-
-      //     //
-      //     if (addCourse) {
-      //       if (eligibleClasses[0].subjects.hasOwnProperty(subject)) {
-      //         eligibleClasses[0].subjects[subject].push(currCourse["Name"]);
-      //       } else {
-      //         eligibleClasses[0].subjects[subject] = [currCourse["Name"]];
-      //       }
-      //     }
-      //   }
-      
   
   
   res.json(eligibleClasses);
