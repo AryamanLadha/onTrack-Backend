@@ -4,31 +4,14 @@ import passport from "passport";
 
 const router = express.Router();
 
-// Courses has getAll, getSingle, and getEligible options.
+// Authentication endpoint
+router.get("/google", controller.authGoogle);
 
-router.get(
-  "/google",
-  passport.authenticate("google", {
-    scope: ["profile", "email"],
-  })
-);
+// This is used for backend, nothing to do with frontend
+router.get("/google/callback", controller.authGoogleCallback);
 
-router.get(
-  "/google/callback",
-  passport.authenticate("google", {
-    failureRedirect: "/login",
-  }),
-  function (req, res) {
-    //sucessfully authenticated, redirecting secrets.
-    res.redirect("/");
-  }
-);
+router.get("/logout", controller.logout);
+router.get("/data", controller.getUserData);
+router.put("/update", controller.updateUserData);
 
-router.get("/logout", function (req, res) {
-  req.session = null;
-  req.logout();
-  res.redirect("/");
-});
-
-router.get("/data", controller.getData);
 export default router;

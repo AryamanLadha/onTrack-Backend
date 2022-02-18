@@ -2,9 +2,9 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 /* Classes are defined with mongoose to validate scheme between Express and MongoDB.
-* each class contains a full name and a short name using the subject area 
-* abbreviation and the class number/code, seperated by a space
-*/
+ * each class contains a full name and a short name using the subject area
+ * abbreviation and the class number/code, seperated by a space
+ */
 const classesSchema = new Schema({
   fullName: String,
   shortName: String,

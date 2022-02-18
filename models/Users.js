@@ -41,6 +41,7 @@ userSchema.statics.findByMajor = (major) => {
 userSchema.statics.findByMajorAndYear = (major, year) => {
   return this.find({ major: major, currentYear: year });
 };
+//required plugins for creating users
 userSchema.plugin(passportLocalMongoose);
 userSchema.plugin(findOrCreate);
 
