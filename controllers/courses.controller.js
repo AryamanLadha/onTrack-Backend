@@ -4,11 +4,11 @@ import Majors from "../models/Majors.js";
 
 const controller = {};
 
-/* Retrieves all documents in Classes model. Get index 0 of the single AllClasses array.
+/* Retrieves all documents in Classes model.
  * Returns the array containing all courses
-*/
+ */
 controller.getAll = async (req, res) => {
-  res.json((await Classes.find())[0].toObject().courses);
+  res.json(await Classes.find({}, { _id: false }));
 };
 
 // Retrieves a single course by short name
@@ -26,14 +26,15 @@ controller.getEligible = async (req, res) => {
       d.getMonth() + 1 >= 2 && d.getMonth() + 1 <= 4
         ? "Spring"
         : d.getMonth() + 1 >= 5 && d.getMonth() + 1 <= 6
-          ? "Summer"
-          : d.getMonth() + 1 >= 7 && d.getMonth() + 1 <= 9
-            ? "Fall"
-            : "Winter";
+        ? "Summer"
+        : d.getMonth() + 1 >= 7 && d.getMonth() + 1 <= 9
+        ? "Fall"
+        : "Winter";
     const year = quarter === "Winter" ? d.getFullYear() + 1 : d.getFullYear();
     return quarter + " " + year;
   })();
 
+  //get student data from URL query
   let data = {};
   try {
     data = JSON.parse(req.query.studentData);
@@ -54,18 +55,11 @@ controller.getEligible = async (req, res) => {
     res.status(400).send("Invalid JSON");
     return;
   }
-  /* For the student's completed and current classes, rearrange the data as an object with 
-   * the short name as the key (value is set to 0) for constant time access when searching 
+  /* For the student's completed and current classes, rearrange the data as an object with
+   * the short name as the key (value is set to 0) for constant time access when searching
    * for the preqs. (all code below will change once we begin storing user data or implement GraphQL)
-  */
-  const completedClasses =
-    data.completedClasses.length > 0
-      ? data.completedClasses.reduce((a, v) => ({ ...a, [v]: 0 }), {})
-      : {};
-  const currentClasses =
-    data.currentClasses.length > 0
-      ? data.currentClasses.reduce((a, v) => ({ ...a, [v]: 0 }), {})
-      : {};
+   */
+
   let eligibleClasses = [{ quarter: await currQuarter, subjects: {} }];
 
   const coursesToCheck = [];
@@ -81,44 +75,22 @@ controller.getEligible = async (req, res) => {
       majorData.length === 0 ? {} : majorData[0].toObject().courses;
 
     for (const subject in avaliableClasses) {
-      // let coursesToCheck = [];
       for (const currentEntry of avaliableClasses[subject]) {
-        /* If a range of classes is given, break the range into 
-         * individual classes and add them to the coursesToCheck array
-        */
-        if (currentEntry.includes("-")) {
-          const possibleRange = (
-            await DetailedClass.bySubjectAreaAbbreviation(subject)
-          )
-            .map((c) => c.toObject()["Name"])
-            .sort();
-          let classNum = currentEntry.split("-").map((x) => subject + " " + x);
-
-          for (const possibleEntry of possibleRange) {
-            if (possibleEntry >= classNum[0] && possibleEntry < classNum[1]) {
-              if (!coursesToCheck.includes(possibleEntry)) {
-                coursesToCheck.push(possibleEntry);
-              }
-            } else if (possibleEntry > classNum[1]) {
-              break;
-            }
-          }
-        } else {
-          coursesToCheck.push(subject + " " + currentEntry);
-        };
-      };
-    };
-  };
-  
-  // using mongodb query operation to filter out all the eligible classes
-  if (data.completedClasses.length >= 1){
-    let eligible = await DetailedClass.byClassesTaken(coursesToCheck,data.completedClasses);
-    console.log(eligible);
-    eligibleClasses[0].subjects= eligible;
+        coursesToCheck.push(subject + " " + currentEntry);
+      }
+    }
   }
 
-  
-  
+  // using mongodb query operation to filter out all the eligible classes
+  if (data.completedClasses.length >= 1) {
+    let eligible = await DetailedClass.byClassesTaken(
+      coursesToCheck,
+      data.completedClasses
+    );
+    console.log(eligible);
+    eligibleClasses[0].subjects = eligible;
+  }
+
   res.json(eligibleClasses);
 };
 

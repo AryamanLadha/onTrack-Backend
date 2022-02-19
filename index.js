@@ -8,6 +8,7 @@ import googleOauth2 from "passport-google-oauth20";
 import session from "express-session";
 import User from "./models/Users.js";
 import cookieSession from "cookie-session";
+import morgan from "morgan";
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -16,17 +17,22 @@ const GoogleStrategy = googleOauth2.Strategy;
 dotenv.config();
 
 //Configure Session Storage
-app.use(cookieSession({
-  name: 'session-name',
-  keys: [process.env.COOKIE_SESSION_SECRET1, process.env.COOKIE_SESSION_SECRET2],
-}))
+app.use(
+  cookieSession({
+    name: "session-name",
+    keys: [
+      process.env.COOKIE_SESSION_SECRET1,
+      process.env.COOKIE_SESSION_SECRET2,
+    ],
+  })
+);
 
 // Authentication configuration
 app.use(
   session({
     resave: false,
     saveUninitialized: false,
-    secret: process.env.EXPRESS_SECRET
+    secret: process.env.EXPRESS_SECRET,
   })
 );
 app.use(passport.initialize());
@@ -60,6 +66,7 @@ passport.deserializeUser(function (id, done) {
     done(err, user);
   });
 });
+
 // Configure passport for user authentication with Google Oauth 2.0
 passport.use(
   new GoogleStrategy(
@@ -72,14 +79,14 @@ passport.use(
       callbackURL: "http://localhost:8000/api/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
-      console.log(profile);
-      User.findOrCreate({ email: profile.emails[0].value, googleId: profile.id }, function (err, user) {
-        return done(err, user);
+      User.findOrCreate({ googleId: profile.id }, function (err, user) {
+        done(null, user);
       });
     }
   )
 );
 
+app.use(morgan("dev")); // Log every request to the console for debugging
 app.use(helmet()); // Helmet adds http headers to boost security of express apps
 app.use(express.json());
 app.use("/api", routes); // Routes defined in routes/index.js
