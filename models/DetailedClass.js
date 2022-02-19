@@ -62,7 +62,14 @@ DetailedClassSchema.statics.byClassesTaken = function (
     {
       $group: {
         _id: "$subjectAreaAbbreviation",
-        classes: { $push: "$name" },
+        classes: { $push: {
+          "name": "$name", 
+          "description": "$description",
+          "units": "$units",
+          "enforcedCorequisites": "$enforcedCorequisites",
+          "restrictions": "$restrictions"},
+          
+        },
       },
     },
   ]);
