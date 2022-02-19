@@ -24,7 +24,7 @@ DetailedClassSchema.statics.bySubjectAreaAbbreviation = function (subjectArea) {
   return this.find({ "Subject Area Abbreviation": subjectArea });
 };
 
-// Helper function to find eligibleClasses: mongoDB aggregate 
+// mongoDB query aggregation helper function that finds all eligible classes from the current quarter
 DetailedClassSchema.statics.byClassesTaken = function (coursesToCheck, classesTaken) {
   return this.aggregate([
       //first stage: find all the eligible classes 
