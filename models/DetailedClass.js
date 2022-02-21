@@ -73,11 +73,14 @@ DetailedClassSchema.statics.byClassesTaken = function (
       },
     },
     // fourth stage: renaming
-    // {
-    //   $rename: {
-    //     "subjects": "_id"
-    //   }
-    // }
+    {
+      $project: {
+        _id : 0,
+        subject: "$_id",
+        classes: 1,
+
+      }
+    }
 
   ]);
 };
