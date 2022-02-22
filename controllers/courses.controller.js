@@ -64,8 +64,7 @@ controller.getEligible = async (req, res) => {
 
   const coursesToCheck = [];
 
-  console.log(eligibleClasses);
-
+  // Add all classes for each major to the coursesToCheck array
   for (const major of data.major) {
     /*  http://localhost:8000/api/courses/eligible/?studentData=
      * {"currentClasses":[],"completedClasses":["COM SCI 180", "MATH 32A", "MATH 32B", "MATH 61", "MATH 31B", "MATH 31A", "PHYSICS 1A"],"major":["COM SCI"]}
@@ -74,6 +73,10 @@ controller.getEligible = async (req, res) => {
     const avaliableClasses =
       majorData.length === 0 ? {} : majorData[0].toObject().courses;
 
+    /* Loop through each subject under the major's courses
+     * and add all the classes to the coursesToCheck array
+     * with the shortname "subjectArea classNumber"
+     */
     for (const subject in avaliableClasses) {
       for (const currentEntry of avaliableClasses[subject]) {
         coursesToCheck.push(subject + " " + currentEntry);
@@ -81,14 +84,22 @@ controller.getEligible = async (req, res) => {
     }
   }
 
-  // using mongodb query operation to filter out all the eligible classes
+  // Using mongodb query operation to filter out all the eligible classes
   if (data.completedClasses.length >= 1) {
     let eligible = await DetailedClass.byClassesTaken(
       coursesToCheck,
       data.completedClasses
     );
-    console.log(eligible);
-    eligibleClasses[0].subjects = eligible;
+
+    /* Reformat eligbleClasses subjects to be an object containing
+     * subjectArea as the key and an array of classe objects as the value
+     */
+    let temp = {};
+    for (let i = 0; i < eligible.length; i++) {
+      temp[eligible[i].subject] = eligible[i].classes;
+    }
+
+    eligibleClasses[0].subjects = temp;
   }
 
   res.json(eligibleClasses);

@@ -47,41 +47,40 @@ DetailedClassSchema.statics.byClassesTaken = function (
   classesTaken
 ) {
   return this.aggregate([
-    //first stage: find all the eligible classes
+    // First stage: find all the eligible classes
     {
       $match: {
         name: { $in: coursesToCheck },
         enforcedPrerequisites: { $not: { $elemMatch: { $nin: classesTaken } } },
       },
     },
-    //second stage: filter out classes already taken
+    // Second stage: filter out classes already taken
     {
       $match: { name: { $nin: classesTaken } },
     },
-    // third stage: organize output data by subject
+    // Third stage: organize output data by subject
     {
       $group: {
         _id: "$subjectAreaAbbreviation",
-        classes: { $push: {
-          "name": "$name", 
-          "description": "$description",
-          "units": "$units",
-          "enforcedCorequisites": "$enforcedCorequisites",
-          "restrictions": "$restrictions"},
-          
+        classes: {
+          $push: {
+            name: "$name",
+            description: "$description",
+            units: "$units",
+            enforcedCorequisites: "$enforcedCorequisites",
+            restrictions: "$restrictions",
+          },
         },
       },
     },
-    // fourth stage: renaming
+    // Fourth stage: renaming
     {
       $project: {
-        _id : 0,
+        _id: 0,
         subject: "$_id",
         classes: 1,
-
-      }
-    }
-
+      },
+    },
   ]);
 };
 
