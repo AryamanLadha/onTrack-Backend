@@ -26,7 +26,7 @@ const DetailedClassSchema = new Schema({
   quartersOffered: [String],
   units: String,
   lectures: [LectureSchema],
-  enforcedPrerequisites: [String],
+  enforcedPrerequisites: [[String]],
   enforcedCorequisites: [String],
   description: String,
   restrictions: String,
