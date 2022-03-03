@@ -44,7 +44,7 @@ DetailedClassSchema.statics.bySubjectAreaAbbreviation = function (subjectArea) {
 const DetailedClass = mongoose.model(
   "CoursesOffered",
   DetailedClassSchema,
-  "CoursesOffered"
+  "CoursesOfferedS22"
 );
 
 export default DetailedClass;
