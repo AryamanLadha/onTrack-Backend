@@ -51,7 +51,9 @@ DetailedClassSchema.statics.byClassesTaken = function (
     {
       $match: {
         name: { $in: coursesToCheck },
-        enforcedPrerequisites: { $not: { $elemMatch: { $nin: classesTaken } } },
+        enforcedPrerequisites: {
+          $not: { $elemMatch: { $elemMatch: { $nin: classesTaken } } },
+        },
       },
     },
     // Second stage: filter out classes already taken
@@ -65,6 +67,7 @@ DetailedClassSchema.statics.byClassesTaken = function (
         classes: {
           $push: {
             name: "$name",
+            longName: "$longName",
             description: "$description",
             units: "$units",
             enforcedCorequisites: "$enforcedCorequisites",
@@ -88,7 +91,7 @@ DetailedClassSchema.statics.byClassesTaken = function (
 const DetailedClass = mongoose.model(
   "CoursesOffered",
   DetailedClassSchema,
-  "CoursesOffered"
+  "CoursesOfferedS22"
 );
 
 export default DetailedClass;
