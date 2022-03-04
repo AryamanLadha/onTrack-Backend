@@ -26,6 +26,8 @@ const userSchema = new Schema({
   accountDate: { type: Date, default: Date.now },
   // uses schema defined above
   coursesTaken: [coursesTakenSchema],
+  // Used to determine where to redirect user after login
+  isNewUser: { type: Boolean, default: true },
 });
 
 // get user by email

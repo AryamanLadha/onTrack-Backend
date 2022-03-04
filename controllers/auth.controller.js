@@ -7,15 +7,16 @@ controller.authGoogle = passport.authenticate("google", {
   scope: ["profile", "email"],
 });
 
-controller.authGoogleCallback = passport.authenticate("google", {
-  failureRedirect: "/login",
-  successRedirect: "/",
-});
+controller.authGoogleCallback = (req, res) => {
+  // Change this to whatever the frontend url is
+  const endpoint = req.user.isNewUser ? "majors" : "profile";
+  res.redirect(`http://localhost:3000/${endpoint}`);
+};
 
 controller.logout = (req, res) => {
   req.session = null;
   req.logout();
-  res.redirect("/");
+  res.redirect("http://localhost:3000/");
 };
 
 controller.getUserData = async (req, res) => {
@@ -25,22 +26,21 @@ controller.getUserData = async (req, res) => {
 
 controller.updateUserData = async (req, res) => {
   const { user } = req;
-  // const userData = { majors: ["bruh", "test"] }
   const { userData } = req.params;
+  userData.isNewUser = false;
 
-  // Check if the user is signed in
-  if (user) {
-    // Update user data based on ID
-    User.findOneAndUpdate({ googleId: user.googleId }, userData, (err) => {
-      if (err) {
-        res.status(500).send(err);
-      } else {
-        res.status(200).send(userData);
-      }
-    });
-  } else {
+  // Do not update user data if the user is not signed in
+  if (!user) {
     return res.status(401).send("Unauthorized");
   }
+  // Update user data based on ID
+  User.findOneAndUpdate({ googleId: user.googleId }, userData, (err) => {
+    if (err) {
+      res.status(500).send(err);
+    } else {
+      res.status(200).send(userData);
+    }
+  });
 };
 
 export default controller;
