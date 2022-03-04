@@ -37,15 +37,14 @@ const correctSubjectAreaName = {
     "A&O SCI",
   ],
   Bioengineering: ["Bioengineering", "BIOENGR"],
-  "Bioinformatics (Graduate)": ["Bioinformatics", "Graduate", "BIOINFO)"],
-  "Bioinformatics (Undergraduate)": [
-    "Bioinformatics",
-    "Undergraduate",
-    "BIOINFR)",
-  ],
+  "Bioinformatics (Graduate)": ["Bioinformatics Graduate", "BIOINFO"],
+  "Bioinformatics Graduate": ["Bioinformatics Graduate", "BIOINFO"],
+  "Bioinformatics (Undergraduate)": ["Bioinformatics Undergraduate", "BIOINFR"],
+  "Bioinformatics Undergraduate": ["Bioinformatics Undergraduate", "BIOINFR"],
   "Biological Chemistry": ["Biological Chemistry", "BIOL CH"],
   Biomathematics: ["Biomathematics", "BIOMATH"],
   "Biomedical Research": ["Biomedical Research", "BMD RES"],
+  "Biomedical Physics": ["Biomedical Physics", "PBMED"],
   Biostatistics: ["Biostatistics", "BIOSTAT"],
   Bulgarian: ["Bulgarian", "BULGR"],
   "Central and East European Studies": [
@@ -54,10 +53,7 @@ const correctSubjectAreaName = {
   ],
   "Chemical Engineering": ["Chemical Engineering", "CH ENGR"],
   "Chemistry and Biochemistry": ["Chemistry and Biochemistry", "CHEM"],
-  "Chicana/o and Central American Studies": [
-    "Chicana/o and Central American Studies",
-    "CCAS",
-  ],
+  "Chicana and Chicano Studies": ["Chicana and Chicano Studies", "CCAS"],
   Chinese: ["Chinese", "CHIN"],
   "Civil and Environmental Engineering": [
     "Civil and Environmental Engineering",
@@ -65,6 +61,7 @@ const correctSubjectAreaName = {
   ],
   Classics: ["Classics", "CLASSIC"],
   Clusters: ["Clusters", "CLUSTER"],
+  "General Education Clusters": ["General Education Clusters", "CLUSTER"],
   Communication: ["Communication", "COMM"],
   "Community Engagement and Social Change": [
     "Community Engagement and Social Change",
@@ -103,6 +100,7 @@ const correctSubjectAreaName = {
     "Electrical and Computer Engineering",
     "EC ENGR",
   ],
+  "Electrical Engineering": ["Electrical Engineering", "EC ENGR"],
   Engineering: ["Engineering", "ENGR"],
   English: ["English", "ENGL"],
   "English as A Second Language": ["English as A Second Language", "ESL"],
@@ -169,8 +167,13 @@ const correctSubjectAreaName = {
   Latin: ["Latin", "LATIN"],
   "Latin American Studies": ["Latin American Studies", "LATN AM"],
   Law: ["Law", "LAW"],
-  "Law (Undergraduate)": ["Law", "Undergraduate", "UG-LAW)"],
+  "Law (Undergraduate)": ["Law Undergraduate", "UG-LAW"],
+  "Law Undergraduate": ["Law Undergraduate", "UG-LAW"],
   "Lesbian, Gay, Bisexual, Transgender, and Queer Studies": [
+    "Lesbian, Gay, Bisexual, Transgender, and Queer Studies",
+    "LGBTQS",
+  ],
+  "Lesbian, Gay, Bisexual, and Transgender Studies": [
     "Lesbian, Gay, Bisexual, Transgender, and Queer Studies",
     "LGBTQS",
   ],
@@ -226,6 +229,7 @@ const correctSubjectAreaName = {
     "MC&IP",
   ],
   Music: ["Music", "MUSC"],
+  "Music History": ["Music History", "MUSC"],
   "Music Industry": ["Music Industry", "MSC IND"],
   Musicology: ["Musicology", "MUSCLG"],
   "Naval Science": ["Naval Science", "NAV SCI"],
@@ -233,7 +237,8 @@ const correctSubjectAreaName = {
   Neurobiology: ["Neurobiology", "NEURBIO"],
   Neurology: ["Neurology", "NEURLGY"],
   Neuroscience: ["Neuroscience", "NEUROSC"],
-  "Neuroscience (Graduate)": ["Neuroscience", "Graduate", "NEURO)"],
+  "Neuroscience (Graduate)": ["Neuroscience Graduate", "NEURO"],
+  "Neuroscience Graduate": ["Neuroscience Graduate", "NEURO"],
   Neurosurgery: ["Neurosurgery", "NEURSGY"],
   Nursing: ["Nursing", "NURSING"],
   "Obstetrics and Gynecology": ["Obstetrics and Gynecology", "OBGYN"],
@@ -293,40 +298,74 @@ const correctSubjectAreaName = {
   "Urban Planning": ["Urban Planning", "URBN PL"],
   Urology: ["Urology", "UROLOGY"],
   Vietnamese: ["Vietnamese", "VIETMSE"],
+  "Women's Studies": ["Women's Studies", "GENDER"],
   "World Arts and Cultures": ["World Arts and Cultures", "WL ARTS"],
   Yiddish: ["Yiddish", "YIDDSH"],
 };
+
+async function updateDB(newClassData) {
+  for (const course in newClassData) {
+    await DetailedClass.updateOne(
+      { _id: newClassData[course]._id },
+      newClassData[course],
+      { multi: true },
+      function (err) {
+        if (err) {
+          throw err;
+        }
+        console.log("Done " + newClassData[course].name);
+      }
+    ).clone();
+  }
+  console.log("Finished");
+  process.exit();
+}
 
 DetailedClass.find({}).then((classes) => {
   for (let course in classes) {
     let enforcedPrerequisites = classes[course].enforcedPrerequisites;
     let enforcedCorequisites = classes[course].enforcedCorequisites;
-    console.log(classes[course], enforcedPrerequisites, enforcedCorequisites);
+    // console.log(classes[course], enforcedPrerequisites, enforcedCorequisites);
 
     let enforcedPrerequisitesLen = enforcedPrerequisites.length;
     let enforcedCorequisitesLen = enforcedCorequisites.length;
     for (let i = 0; i < enforcedPrerequisitesLen; i++) {
       let len = enforcedPrerequisites[i].length;
       for (let j = 0; j < len; j++) {
-        let longSubjectArea = enforcedPrerequisites[i][j].split(" ");
-        let courseCode = longSubjectArea.pop();
-        enforcedPrerequisites[i][j] =
-          correctSubjectAreaName[longSubjectArea.join(" ")][1] +
-          " " +
-          courseCode;
+        let longSubjectArea = enforcedPrerequisites[i][j].trim().split(" ");
+        // console.log("BEFORE: " + longSubjectArea.join(" "));
+        let courseCode = longSubjectArea.splice(-1);
+        // console.log("AFTER: " + longSubjectArea.join(" "));
+        try {
+          classes[course].enforcedPrerequisites[i][j] =
+            correctSubjectAreaName[longSubjectArea.join(" ")][1] +
+            " " +
+            courseCode;
+        } catch {
+          console.log(
+            "What is this: " + longSubjectArea.join(" ") + " " + courseCode
+          );
+        }
       }
     }
     for (let i = 0; i < enforcedCorequisitesLen; i++) {
       let len = enforcedCorequisites[i].length;
       for (let j = 0; j < len; j++) {
-        let longSubjectArea = enforcedCorequisites[i][j].split(" ");
-        let courseCode = longSubjectArea.pop();
-        enforcedCorequisites[i][j] =
-          correctSubjectAreaName[longSubjectArea.join(" ")][1] +
-          " " +
-          courseCode;
+        let longSubjectArea = enforcedCorequisites[i][j].trim().split(" ");
+        let courseCode = longSubjectArea.splice(-1);
+        // onsole.log(longSubjectArea.join(" "));
+        try {
+          classes[course].enforcedCorequisites[i][j] =
+            correctSubjectAreaName[longSubjectArea.join(" ")][1] +
+            " " +
+            courseCode;
+        } catch {
+          console.log(
+            "What is this: " + longSubjectArea.join(" ") + " " + courseCode
+          );
+        }
       }
     }
-    console.log(classes);
   }
+  updateDB(classes);
 });
