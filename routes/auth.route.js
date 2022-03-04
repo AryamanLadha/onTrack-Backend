@@ -8,7 +8,13 @@ const router = express.Router();
 router.get("/google", controller.authGoogle);
 
 // This is used for backend, nothing to do with frontend
-router.get("/google/callback", controller.authGoogleCallback);
+router.get(
+  "/google/callback",
+  passport.authenticate("google", {
+    failureRedirect: "/login",
+  }),
+  controller.authGoogleCallback
+);
 
 router.get("/logout", controller.logout);
 router.get("/data", controller.getUserData);

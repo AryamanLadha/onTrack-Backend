@@ -20,14 +20,14 @@ const LectureSchema = new Schema({
 });
 const DetailedClassSchema = new Schema({
   name: String,
+  longName: String,
   subjectArea: String,
   subjectAreaAbbreviation: String,
   quartersOffered: [String],
   units: String,
   lectures: [LectureSchema],
-  enforcedPrerequisites: [String],
-  optionalPrerequisites: [String],
-  enforcedCorequisites: [String],
+  enforcedPrerequisites: [[String]],
+  enforcedCorequisites: [[String]],
   description: String,
   restrictions: String,
 });
@@ -44,7 +44,7 @@ DetailedClassSchema.statics.bySubjectAreaAbbreviation = function (subjectArea) {
 const DetailedClass = mongoose.model(
   "CoursesOffered",
   DetailedClassSchema,
-  "CoursesOffered"
+  "CoursesOfferedS22"
 );
 
 export default DetailedClass;
