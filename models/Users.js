@@ -5,15 +5,15 @@ import findOrCreate from "mongoose-findorcreate";
 // defined by quarter
 const coursesTakenSchema = new Schema({
   quarter: { type: String, default: "" },
-  courses: [String],
+  courses: { type: [String], default: [] },
 });
 
 const userSchema = new Schema({
-  email: String,
-  googleId: String,
-  fullName: { type: String, default: "" },
-  majors: [String],
-  minors: [String],
+  email: { type: String, unique: true, require: true },
+  googleId: { type: String, unique: true, require: true },
+  fullName: { type: String, default: "", require: true },
+  majors: { type: [String], default: [] },
+  minors: { type: [String], default: [] },
   dates: {
     quarterEntered: { type: String, default: "" },
     quarterExpectedGraduation: { type: String, default: "" },
@@ -25,7 +25,7 @@ const userSchema = new Schema({
   // date of account creation, useful for aggregating data for statistics
   accountDate: { type: Date, default: Date.now },
   // uses schema defined above
-  coursesTaken: [coursesTakenSchema],
+  coursesTaken: { type: [coursesTakenSchema] },
   // Used to determine where to redirect user after login
   isNewUser: { type: Boolean, default: true },
 });

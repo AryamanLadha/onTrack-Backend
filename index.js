@@ -94,6 +94,8 @@ passport.use(
           user = new User({
             fullName: profile.displayName,
             googleId: profile.id,
+            email: profile.emails[0].value,
+            username: profile.id,
           });
           user.save(function (err) {
             if (err) console.log(err);
