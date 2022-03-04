@@ -1,4 +1,3 @@
-import Majors from "../models/Majors.js";
 import DetailedClass from "../models/DetailedClass.js";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
