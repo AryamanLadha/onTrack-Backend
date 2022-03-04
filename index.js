@@ -79,10 +79,26 @@ passport.use(
       callbackURL: "http://localhost:8000/api/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
-      User.findOrCreate(
-        { googleId: profile.id, fullName: profile.displayName },
+      User.findOne(
+        {
+          googleId: profile.id,
+        },
         function (err, user) {
-          done(null, user);
+          if (err) {
+            return done(err);
+          } else if (user) {
+            return done(err, user);
+          }
+
+          // Create a new user if it does not exist
+          user = new User({
+            fullName: profile.displayName,
+            googleId: profile.id,
+          });
+          user.save(function (err) {
+            if (err) console.log(err);
+            return done(err, user);
+          });
         }
       );
     }
