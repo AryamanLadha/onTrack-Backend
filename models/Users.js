@@ -25,7 +25,7 @@ const userSchema = new Schema({
   // date of account creation, useful for aggregating data for statistics
   accountDate: { type: Date, default: Date.now },
   // uses schema defined above
-  coursesTaken: { type: [coursesTakenSchema] },
+  coursesTaken: [coursesTakenSchema],
   // Used to determine where to redirect user after login
   isNewUser: { type: Boolean, default: true },
 });

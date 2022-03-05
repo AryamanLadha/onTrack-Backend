@@ -26,13 +26,16 @@ controller.getUserData = async (req, res) => {
 
 controller.updateUserData = async (req, res) => {
   const { user } = req;
-  const { userData } = req.params;
+  let { userData } = req.query;
+  userData = JSON.parse(userData);
+
   userData.isNewUser = false;
 
   // Do not update user data if the user is not signed in
   if (!user) {
     return res.status(401).send("Unauthorized");
   }
+
   // Update user data based on ID
   User.findOneAndUpdate({ googleId: user.googleId }, userData, (err) => {
     if (err) {
