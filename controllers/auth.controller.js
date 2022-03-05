@@ -27,7 +27,11 @@ controller.getUserData = async (req, res) => {
 controller.updateUserData = async (req, res) => {
   const { user } = req;
   let { userData } = req.query;
-  userData = JSON.parse(userData);
+  try {
+    userData = JSON.parse(userData);
+  } catch (err) {
+    res.status(400).json({ error: "Invalid JSON" });
+  }
 
   userData.isNewUser = false;
 
