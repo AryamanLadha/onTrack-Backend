@@ -9,6 +9,7 @@ import session from "express-session";
 import User from "./models/Users.js";
 import cookieSession from "cookie-session";
 import morgan from "morgan";
+import cors from "cors";
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -26,6 +27,8 @@ app.use(
     ],
   })
 );
+
+app.use(cors());
 
 // Authentication configuration
 app.use(
