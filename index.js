@@ -79,9 +79,12 @@ passport.use(
       callbackURL: "http://localhost:8000/api/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
-      User.findOrCreate({ googleId: profile.id }, function (err, user) {
-        done(null, user);
-      });
+      User.findOrCreate(
+        { googleId: profile.id, fullName: profile.displayName },
+        function (err, user) {
+          done(null, user);
+        }
+      );
     }
   )
 );

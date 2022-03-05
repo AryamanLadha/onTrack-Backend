@@ -59,16 +59,12 @@ controller.getEligible = async (req, res) => {
    * the short name as the key (value is set to 0) for constant time access when searching
    * for the preqs. (all code below will change once we begin storing user data or implement GraphQL)
    */
-  const completedClasses =
-    data.completedClasses.length > 0
-      ? data.completedClasses.reduce((a, v) => ({ ...a, [v]: 0 }), {})
-      : {};
-  const currentClasses =
-    data.currentClasses.length > 0
-      ? data.currentClasses.reduce((a, v) => ({ ...a, [v]: 0 }), {})
-      : {};
-  const eligibleClasses = [{ quarter: await currQuarter, subjects: {} }];
 
+  let eligibleClasses = [{ quarter: await currQuarter, subjects: {} }];
+
+  const coursesToCheck = [];
+
+  // Add all classes for each major to the coursesToCheck array
   for (const major of data.major) {
     /*  http://localhost:8000/api/courses/eligible/?studentData=
      * {"currentClasses":[],"completedClasses":["COM SCI 180", "MATH 32A", "MATH 32B", "MATH 61", "MATH 31B", "MATH 31A", "PHYSICS 1A"],"major":["COM SCI"]}
@@ -77,90 +73,35 @@ controller.getEligible = async (req, res) => {
     const avaliableClasses =
       majorData.length === 0 ? {} : majorData[0].toObject().courses;
 
+    /* Loop through each subject under the major's courses
+     * and add all the classes to the coursesToCheck array
+     * with the shortname "subjectArea classNumber"
+     */
     for (const subject in avaliableClasses) {
-      let coursesToCheck = [];
       for (const currentEntry of avaliableClasses[subject]) {
-        /* If a range of classes is given, break the range into
-         * individual classes and add them to the coursesToCheck array
-         */
-        if (currentEntry.includes("-")) {
-          const possibleRange = (
-            await DetailedClass.bySubjectAreaAbbreviation(subject)
-          )
-            .map((c) => c.toObject()["name"])
-            .sort();
-          let classNum = currentEntry.split("-").map((x) => subject + " " + x);
-
-          for (const possibleEntry of possibleRange) {
-            if (possibleEntry >= classNum[0] && possibleEntry < classNum[1]) {
-              if (!coursesToCheck.includes(possibleEntry)) {
-                coursesToCheck.push(possibleEntry);
-              }
-            } else if (possibleEntry > classNum[1]) {
-              break;
-            }
-          }
-        } else {
-          coursesToCheck.push(subject + " " + currentEntry);
-        }
-      }
-      for (const course of coursesToCheck) {
-        let currCourse = await DetailedClass.byName(course);
-        // Class not offered/found this quarter (invalid short name or missing from database)
-        if (currCourse.length === 0) {
-          // console.log(course + " not offered this quarter");
-        } else {
-          currCourse = currCourse[0];
-          let addCourse = true;
-
-          // Check if class is already completed or in progress
-          if (
-            completedClasses.hasOwnProperty(currCourse["name"]) ||
-            currentClasses.hasOwnProperty(currCourse["name"])
-          ) {
-            addCourse = false;
-          }
-          for (const course of currCourse["enforcedPrerequisites"]) {
-            if (!addCourse) {
-              break;
-            }
-            if (!completedClasses.hasOwnProperty(course)) {
-              addCourse = false;
-              break;
-            }
-          }
-          for (const course of currCourse["enforcedCorequisites"]) {
-            if (!addCourse) {
-              break;
-            }
-            if (
-              !currentClasses.hasOwnProperty(course) &&
-              !completedClasses.hasOwnProperty(course)
-            ) {
-              addCourse = false;
-              break;
-            }
-          }
-
-          if (addCourse) {
-            const courseObj = {
-              name: currCourse["name"],
-              description: currCourse["description"],
-              units: currCourse["units"],
-              enforcedCorequisites: currCourse["enforcedCorequisites"],
-              restrictions: currCourse["restrictions"],
-            };
-
-            if (eligibleClasses[0].subjects.hasOwnProperty(subject)) {
-              eligibleClasses[0].subjects[subject].push(courseObj);
-            } else {
-              eligibleClasses[0].subjects[subject] = [courseObj];
-            }
-          }
-        }
+        coursesToCheck.push(subject + " " + currentEntry);
       }
     }
   }
+
+  // Using mongodb query operation to filter out all the eligible classes
+  if (data.completedClasses.length >= 1) {
+    let eligible = await DetailedClass.byClassesTaken(
+      coursesToCheck,
+      data.completedClasses
+    );
+
+    /* Reformat eligbleClasses subjects to be an object containing
+     * subjectArea as the key and an array of classe objects as the value
+     */
+    let temp = {};
+    for (let i = 0; i < eligible.length; i++) {
+      temp[eligible[i].subject] = eligible[i].classes;
+    }
+
+    eligibleClasses[0].subjects = temp;
+  }
+
   res.json(eligibleClasses);
 };
 
