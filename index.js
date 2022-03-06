@@ -9,6 +9,8 @@ import session from "express-session";
 import User from "./models/Users.js";
 import cookieSession from "cookie-session";
 import morgan from "morgan";
+import cors from "cors";
+import redis from "connect-redis";
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -26,6 +28,14 @@ app.use(
     ],
   })
 );
+
+const corsConfig = {
+  origin: true,
+  credentials: true,
+};
+
+app.use(cors(corsConfig));
+app.options("*", cors(corsConfig));
 
 // Authentication configuration
 app.use(
@@ -48,21 +58,11 @@ mongoose
   .then(() => console.log("Connected to mongoDB"))
   .catch((err) => console.log(err));
 
-// Fix CORS missing
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
-  next();
-});
-
 passport.serializeUser(function (user, done) {
-  done(null, user.id);
+  done(null, user.googleId);
 });
 passport.deserializeUser(function (id, done) {
-  User.findById(id, function (err, user) {
+  User.findOne({ googleId: id }, function (err, user) {
     done(err, user);
   });
 });
@@ -79,10 +79,28 @@ passport.use(
       callbackURL: "http://localhost:8000/api/auth/google/callback",
     },
     async (accessToken, refreshToken, profile, done) => {
-      User.findOrCreate(
-        { googleId: profile.id, fullName: profile.displayName },
+      User.findOne(
+        {
+          googleId: profile.id,
+        },
         function (err, user) {
-          done(null, user);
+          if (err) {
+            return done(err);
+          } else if (user) {
+            return done(err, user);
+          }
+
+          // Create a new user if it does not exist
+          user = new User({
+            fullName: profile.displayName,
+            googleId: profile.id,
+            email: profile.emails[0].value,
+            username: profile.id,
+          });
+          user.save(function (err) {
+            if (err) console.log(err);
+            return done(err, user);
+          });
         }
       );
     }
