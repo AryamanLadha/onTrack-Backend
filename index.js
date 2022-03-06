@@ -10,6 +10,7 @@ import User from "./models/Users.js";
 import cookieSession from "cookie-session";
 import morgan from "morgan";
 import cors from "cors";
+import redis from "connect-redis";
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -28,7 +29,13 @@ app.use(
   })
 );
 
-app.use(cors());
+const corsConfig = {
+  origin: true,
+  credentials: true,
+};
+
+app.use(cors(corsConfig));
+app.options("*", cors(corsConfig));
 
 // Authentication configuration
 app.use(
@@ -51,21 +58,11 @@ mongoose
   .then(() => console.log("Connected to mongoDB"))
   .catch((err) => console.log(err));
 
-// Fix CORS missing
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header(
-    "Access-Control-Allow-Headers",
-    "Origin, X-Requested-With, Content-Type, Accept"
-  );
-  next();
-});
-
 passport.serializeUser(function (user, done) {
-  done(null, user.id);
+  done(null, user.googleId);
 });
 passport.deserializeUser(function (id, done) {
-  User.findById(id, function (err, user) {
+  User.findOne({ googleId: id }, function (err, user) {
     done(err, user);
   });
 });
