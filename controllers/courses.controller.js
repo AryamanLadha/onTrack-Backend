@@ -19,6 +19,10 @@ controller.getSingle = async (req, res) => {
 
 // Retrieve all eligible courses based on previous classes and reqs in different subject areas from DARS.
 controller.getEligible = async (req, res) => {
+  if (!req.user) {
+    return res.status(401).send("Unauthorized");
+  }
+
   const currQuarter = (async () => {
     // TODO: Test and implement the date functionality correctly
     const d = new Date();
