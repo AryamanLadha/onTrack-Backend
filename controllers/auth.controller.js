@@ -7,23 +7,31 @@ controller.authGoogle = passport.authenticate("google", {
   scope: ["profile", "email"],
 });
 
+// Callback to redirect on successful authentication
 controller.authGoogleCallback = (req, res) => {
   // Change this to whatever the frontend url is
   const endpoint = req.user.isNewUser ? "majors" : "profile";
-  res.redirect(`http://localhost:3000/${endpoint}`);
+  res.redirect(process.env.FRONT_END_URL + endpoint);
 };
 
+// Clear session on logout
 controller.logout = (req, res) => {
   req.session = null;
   req.logout();
-  res.redirect("http://localhost:3000/");
+  res.redirect(process.env.FRONT_END_URL);
 };
 
+// Return user data
 controller.getUserData = async (req, res) => {
-  const { user } = req;
-  user ? res.json(user) : res.json({});
+  // Check if user is logged in
+  if (!req.user) {
+    return res.status(401).send("Unauthorized");
+  }
+
+  return res.json(req.user);
 };
 
+// Endpoint to update user data
 controller.updateUserData = async (req, res) => {
   const { user } = req;
   let userData = req.body;

@@ -19,6 +19,7 @@ controller.getSingle = async (req, res) => {
 
 // Retrieve all eligible courses based on previous classes and reqs in different subject areas from DARS.
 controller.getEligible = async (req, res) => {
+  // Check if user is logged in
   if (!req.user) {
     return res.status(401).send("Unauthorized");
   }
