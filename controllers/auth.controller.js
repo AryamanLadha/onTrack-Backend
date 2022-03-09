@@ -18,7 +18,7 @@ controller.authGoogleCallback = (req, res) => {
 controller.logout = (req, res) => {
   req.session = null;
   req.logout();
-  res.redirect(process.env.FRONT_END_URL);
+  return res.status(200).send("Logged out");
 };
 
 // Return user data
