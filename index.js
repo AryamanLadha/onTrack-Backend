@@ -76,7 +76,7 @@ passport.use(
       authorizationURL: "https://accounts.google.com/o/oauth2/v2/auth",
       tokenURL: "https://www.googleapis.com/oauth2/v4/token",
       userProfileURL: "https://www.googleapis.com/oauth2/v3/userinfo",
-      callbackURL: "http://localhost:8000/api/auth/google/callback",
+      callbackURL: `${process.env.BACK_END_URL}api/auth/google/callback`,
     },
     async (accessToken, refreshToken, profile, done) => {
       User.findOne(
