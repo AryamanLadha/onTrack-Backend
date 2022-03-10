@@ -10,7 +10,7 @@ controller.authGoogle = passport.authenticate("google", {
 // Callback to redirect on successful authentication
 controller.authGoogleCallback = (req, res) => {
   // Change this to whatever the frontend url is
-  const endpoint = req.user.isNewUser ? "majors" : "profile";
+  const endpoint = req.user.isNewUser ? "/majors" : "/profile";
   res.redirect(process.env.FRONT_END_URL + endpoint);
 };
 
