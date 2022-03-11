@@ -16,6 +16,8 @@ const app = express();
 const port = process.env.PORT || 8000;
 const GoogleStrategy = googleOauth2.Strategy;
 
+app.set("trust proxy", 1); // trust first proxy
+
 dotenv.config();
 
 app.set("trust proxy", 1); // trust first proxy
@@ -40,6 +42,20 @@ const corsConfig = {
 
 app.use(cors(corsConfig));
 app.options("*", cors(corsConfig));
+
+// Authentication configuration
+// app.use(
+//   session({
+//     secret: process.env.EXPRESS_SECRET,
+//     saveUninitialized: false,
+//     resave: false,
+//     proxy: true,
+//     cookie: {
+//       sameSite: "none",
+//       secure: true,
+//     },
+//   })
+// );
 
 app.use(passport.initialize());
 app.use(passport.session());
