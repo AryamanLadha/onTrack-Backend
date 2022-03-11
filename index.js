@@ -16,6 +16,8 @@ const app = express();
 const port = process.env.PORT || 8000;
 const GoogleStrategy = googleOauth2.Strategy;
 
+app.set("trust proxy", 1); // trust first proxy
+
 dotenv.config();
 
 //Configure Session Storage
@@ -39,7 +41,6 @@ const corsConfig = {
 app.use(cors(corsConfig));
 app.options("*", cors(corsConfig));
 
-app.set("trust proxy", 1); // trust first proxy
 // Authentication configuration
 app.use(
   session({
@@ -47,7 +48,9 @@ app.use(
     saveUninitialized: false,
     secret: process.env.EXPRESS_SECRET,
     cookie: {
+      sameSite: "none",
       secure: true,
+      httpOnly: true,
     },
   })
 );
