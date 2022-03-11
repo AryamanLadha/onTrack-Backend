@@ -53,36 +53,38 @@ app.options("*", cors(corsConfig));
 //   })
 // );
 
-app.set('trust proxy', 1);
-app.use(
-  cookieSession({
-    name: "session-name",
-    keys: [
-      process.env.COOKIE_SESSION_SECRET1,
-      process.env.COOKIE_SESSION_SECRET2,
-    ],
-  })
-);
-
+app.set("trust proxy", 1);
+// app.use(
+//   cookieSession({
+//     name: "session-name",
+//     keys: [
+//       process.env.COOKIE_SESSION_SECRET1,
+//       process.env.COOKIE_SESSION_SECRET2,
+//     ],
+//   })
+// );
 
 // set a cookie
 
+app.use(
+  session({
+    cookie: {
+      secure: true,
+      maxAge: 60000,
+    },
+    proxy: true,
+    secure: true,
+    resave: false,
+    saveUninitialized: false,
+    secret: process.env.EXPRESS_SECRET,
+  })
+);
 
 // app.use(session({
-//   cookie:{
-//     secure: true,
-//     maxAge:60000
-//   },
 //   secret: process.env.EXPRESS_SECRET,
-//   saveUninitialized: true,
-//   resave: false
-// }));
-
-// app.use(session({ 
-//   secret: process.env.EXPRESS_SECRET, 
 //   resave: false,
 //   saveUninitialized: true,
-//   cookie: { secure: true } 
+//   cookie: { secure: true }
 // }));
 app.use(passport.initialize());
 app.use(passport.session());
