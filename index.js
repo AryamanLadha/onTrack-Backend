@@ -18,16 +18,18 @@ const GoogleStrategy = googleOauth2.Strategy;
 
 dotenv.config();
 
+app.set("trust proxy", 1); // trust first proxy
+
 //Configure Session Storage
-app.use(
-  cookieSession({
-    name: "session-name",
-    keys: [
-      process.env.COOKIE_SESSION_SECRET1,
-      process.env.COOKIE_SESSION_SECRET2,
-    ],
-  })
-);
+// app.use(
+//   cookieSession({
+//     name: "session-name",
+//     keys: [
+//       process.env.COOKIE_SESSION_SECRET1,
+//       process.env.COOKIE_SESSION_SECRET2,
+//     ],
+//   })
+// );
 
 const allowedOrigins = [process.env.FRONT_END_URL, process.env.BACK_END_URL];
 
@@ -39,14 +41,6 @@ const corsConfig = {
 app.use(cors(corsConfig));
 app.options("*", cors(corsConfig));
 
-// Authentication configuration
-app.use(
-  session({
-    resave: false,
-    saveUninitialized: false,
-    secret: process.env.EXPRESS_SECRET,
-  })
-);
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -54,8 +48,6 @@ app.use(function (req, res, next) {
   res.locals.user = req.user || null;
   next();
 });
-
-app.set("trust proxy", 1); // trust first proxy
 
 // Connect to database
 mongoose
