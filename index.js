@@ -39,15 +39,14 @@ const corsConfig = {
 app.use(cors(corsConfig));
 app.options("*", cors(corsConfig));
 
+app.set("trust proxy", 1); // trust first proxy
 // Authentication configuration
 app.use(
   session({
     resave: false,
     saveUninitialized: false,
     secret: process.env.EXPRESS_SECRET,
-    proxy: true,
     cookie: {
-      sameSite: "none",
       secure: true,
     },
   })
@@ -59,8 +58,6 @@ app.use(function (req, res, next) {
   res.locals.user = req.user || null;
   next();
 });
-
-app.set("trust proxy", 1); // trust first proxy
 
 // Connect to database
 mongoose
