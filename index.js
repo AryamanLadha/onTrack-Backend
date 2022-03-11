@@ -33,7 +33,7 @@ app.use(
   session({
     cookie: {
       secure: true,
-      maxAge: 60000,
+      // maxAge: 60 * 60 * 1000,
       sameSite: "none",
     },
     proxy: true,
