@@ -54,12 +54,22 @@ app.options("*", cors(corsConfig));
 // );
 
 app.set("trust proxy", 1); // trust first proxy
-app.use(session({ 
-  secret: process.env.EXPRESS_SECRET, 
-  resave: false,
-  saveUninitialized: true,
-  cookie: { secure: true } 
-}));
+app.use(
+  cookieSession({
+    name: "session-name",
+    keys: [
+      process.env.COOKIE_SESSION_SECRET1,
+      process.env.COOKIE_SESSION_SECRET2,
+    ],
+  })
+);
+
+// app.use(session({ 
+//   secret: process.env.EXPRESS_SECRET, 
+//   resave: false,
+//   saveUninitialized: true,
+//   cookie: { secure: true } 
+// }));
 app.use(passport.initialize());
 app.use(passport.session());
 
