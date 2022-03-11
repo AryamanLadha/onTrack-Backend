@@ -44,16 +44,12 @@ app.options("*", cors(corsConfig));
 // Authentication configuration
 app.use(
   session({
-    resave: false,
+    secret: secret,
     saveUninitialized: false,
-    secret: process.env.EXPRESS_SECRET,
-    cookie: {
-      sameSite: "none",
-      secure: true,
-      httpOnly: true,
-    },
+    resave: false,
   })
 );
+
 app.use(passport.initialize());
 app.use(passport.session());
 
