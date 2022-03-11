@@ -54,6 +54,9 @@ app.use(function (req, res, next) {
   res.locals.user = req.user || null;
   next();
 });
+
+app.set("trust proxy", 1); // trust first proxy
+
 // Connect to database
 mongoose
   .connect(process.env.DB_URI)
