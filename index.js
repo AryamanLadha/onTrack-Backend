@@ -16,11 +16,7 @@ const app = express();
 const port = process.env.PORT || 8000;
 const GoogleStrategy = googleOauth2.Strategy;
 
-app.set("trust proxy", 1); // trust first proxy
-
 dotenv.config();
-
-app.set("trust proxy", 1); // trust first proxy
 
 //Configure Session Storage
 // app.use(
@@ -57,7 +53,13 @@ app.options("*", cors(corsConfig));
 //   })
 // );
 
-app.use(session({ secret: process.env.EXPRESS_SECRET }));
+app.set("trust proxy", 1); // trust first proxy
+app.use(session({ 
+  secret: process.env.EXPRESS_SECRET, 
+  resave: false,
+  saveUninitialized: true,
+  cookie: { secure: true } 
+}));
 app.use(passport.initialize());
 app.use(passport.session());
 
