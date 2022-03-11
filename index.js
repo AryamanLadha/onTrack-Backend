@@ -47,6 +47,11 @@ app.use(
     secret: process.env.EXPRESS_SECRET,
     saveUninitialized: false,
     resave: false,
+    proxy: true,
+    cookie: {
+      sameSite: "none",
+      secure: true,
+    },
   })
 );
 
