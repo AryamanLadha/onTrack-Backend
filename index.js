@@ -71,6 +71,7 @@ app.use(
     cookie: {
       secure: true,
       maxAge: 60000,
+      sameSite: "none",
     },
     proxy: true,
     secure: true,
