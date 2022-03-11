@@ -44,7 +44,7 @@ app.options("*", cors(corsConfig));
 // Authentication configuration
 app.use(
   session({
-    secret: secret,
+    secret: process.env.EXPRESS_SECRET,
     saveUninitialized: false,
     resave: false,
   })
