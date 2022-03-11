@@ -45,6 +45,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     secret: process.env.EXPRESS_SECRET,
+    proxy: true,
   })
 );
 app.use(passport.initialize());
