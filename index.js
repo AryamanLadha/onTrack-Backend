@@ -46,6 +46,10 @@ app.use(
     saveUninitialized: false,
     secret: process.env.EXPRESS_SECRET,
     proxy: true,
+    cookie: {
+      sameSite: "none",
+      secure: true,
+    },
   })
 );
 app.use(passport.initialize());
