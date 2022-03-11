@@ -57,6 +57,7 @@ app.options("*", cors(corsConfig));
 //   })
 // );
 
+app.use(express.session({ secret: process.env.EXPRESS_SECRET }));
 app.use(passport.initialize());
 app.use(passport.session());
 
