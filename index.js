@@ -18,17 +18,6 @@ const GoogleStrategy = googleOauth2.Strategy;
 
 dotenv.config();
 
-//Configure Session Storage
-// app.use(
-//   cookieSession({
-//     name: "session-name",
-//     keys: [
-//       process.env.COOKIE_SESSION_SECRET1,
-//       process.env.COOKIE_SESSION_SECRET2,
-//     ],
-//   })
-// );
-
 const allowedOrigins = [process.env.FRONT_END_URL, process.env.BACK_END_URL];
 
 const corsConfig = {
@@ -39,33 +28,7 @@ const corsConfig = {
 app.use(cors(corsConfig));
 app.options("*", cors(corsConfig));
 
-// Authentication configuration
-// app.use(
-//   session({
-//     secret: process.env.EXPRESS_SECRET,
-//     saveUninitialized: false,
-//     resave: false,
-//     proxy: true,
-//     cookie: {
-//       sameSite: "none",
-//       secure: true,
-//     },
-//   })
-// );
-
 app.set("trust proxy", 1);
-// app.use(
-//   cookieSession({
-//     name: "session-name",
-//     keys: [
-//       process.env.COOKIE_SESSION_SECRET1,
-//       process.env.COOKIE_SESSION_SECRET2,
-//     ],
-//   })
-// );
-
-// set a cookie
-
 app.use(
   session({
     cookie: {
@@ -81,12 +44,6 @@ app.use(
   })
 );
 
-// app.use(session({
-//   secret: process.env.EXPRESS_SECRET,
-//   resave: false,
-//   saveUninitialized: true,
-//   cookie: { secure: true }
-// }));
 app.use(passport.initialize());
 app.use(passport.session());
 
